@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _selectedRole = 'veterinario';
   bool _loading = false;
   bool _obscurePassword = true;
+  bool _isHoveringLogin = false;
 
   Future<void> _register() async {
     setState(() => _loading = true);
@@ -41,15 +42,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Registro exitoso'),
+          backgroundColor: Colors.green.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
 
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al registrar: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al registrar: $e'),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
     } finally {
       setState(() => _loading = false);
     }
@@ -58,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isWeb = size.width > 600;
+    final isWeb = size.width > 800;
 
     return Scaffold(
       body: Container(
@@ -66,9 +81,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
           ),
         ),
         child: Stack(
@@ -100,215 +115,71 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
               );
             }),
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: isWeb ? 450 : double.infinity,
-                  ),
+            if (isWeb)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: size.width * 0.5,
+                child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Colors.tealAccent, Colors.teal],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.tealAccent.withOpacity(0.3),
-                                  blurRadius: 30,
-                                  spreadRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.pets,
-                              size: 60,
-                              color: Colors.white,
-                            ),
-                          )
-                          .animate()
-                          .fadeIn(duration: 800.ms)
-                          .scale(
-                            begin: const Offset(0.3, 0.3),
-                            end: const Offset(1.0, 1.0),
-                            duration: 800.ms,
-                            curve: Curves.elasticOut,
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Colors.tealAccent, Colors.teal],
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.tealAccent.withOpacity(0.3),
+                              blurRadius: 30,
+                              spreadRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.pets,
+                          size: 70,
+                          color: Colors.white,
+                        ),
+                      ),
                       const SizedBox(height: 24),
                       const Text(
-                            'Registro\nPets & Health',
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              height: 1.2,
-                              shadows: [
-                                Shadow(
-                                  offset: Offset(0, 2),
-                                  blurRadius: 8,
-                                  color: Colors.black38,
-                                ),
-                              ],
+                        'Veterinaria\nPets & Health',
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.2,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 2),
+                              blurRadius: 8,
+                              color: Colors.black38,
                             ),
-                            textAlign: TextAlign.center,
-                          )
-                          .animate()
-                          .fadeIn(delay: 400.ms, duration: 800.ms)
-                          .slideY(begin: 0.3, end: 0),
-                      const SizedBox(height: 50),
-                      Container(
-                            padding: const EdgeInsets.all(32),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              color: Colors.white.withOpacity(0.1),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 20,
-                                  spreadRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'Crear cuenta',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 32),
-                                buildTextField(
-                                  _nombreController,
-                                  'Nombre',
-                                  Icons.person,
-                                  TextInputType.text,
-                                ),
-                                const SizedBox(height: 20),
-                                buildTextField(
-                                  _apellidoController,
-                                  'Apellido',
-                                  Icons.person_outline,
-                                  TextInputType.text,
-                                ),
-                                const SizedBox(height: 20),
-                                buildTextField(
-                                  _telefonoController,
-                                  'Número de teléfono',
-                                  Icons.phone,
-                                  TextInputType.phone,
-                                ),
-                                const SizedBox(height: 20),
-                                buildTextField(
-                                  _emailController,
-                                  'Correo electrónico',
-                                  Icons.email_outlined,
-                                  TextInputType.emailAddress,
-                                ),
-                                const SizedBox(height: 20),
-                                buildPasswordField(),
-                                const SizedBox(height: 20),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Rol',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.3),
-                                        ),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton<String>(
-                                          value: _selectedRole,
-                                          dropdownColor: Colors.teal[800],
-                                          icon: const Icon(
-                                            Icons.arrow_drop_down,
-                                            color: Colors.white,
-                                          ),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                          ),
-                                          isExpanded: true,
-                                          items: const [
-                                            DropdownMenuItem(
-                                              value: 'veterinario',
-                                              child: Text('Veterinario'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'administrador',
-                                              child: Text('Administrador'),
-                                            ),
-                                          ],
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _selectedRole = value!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 30),
-                                ElevatedButton(
-                                  onPressed: _loading ? null : _register,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.tealAccent,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 48,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                  ),
-                                  child: _loading
-                                      ? const CircularProgressIndicator(
-                                          color: Colors.black,
-                                        )
-                                      : const Text(
-                                          'Registrarse',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                ),
-                              ],
-                            ),
-                          )
-                          .animate()
-                          .fadeIn(delay: 500.ms, duration: 800.ms)
-                          .slideY(begin: 0.3, end: 0),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
+                  ),
+                ),
+              ),
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: isWeb ? size.width * 0.5 : size.width,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: _buildRegisterForm(),
                   ),
                 ),
               ),
@@ -319,12 +190,176 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget buildTextField(
-    TextEditingController controller,
-    String label,
-    IconData icon,
-    TextInputType keyboardType,
-  ) {
+  Widget _buildRegisterForm() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white.withOpacity(0.1),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            spreadRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(32, 32, 32, 16),
+            child: Text(
+              'Crear Cuenta',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
+              child: Column(
+                children: [
+                  _buildField(
+                    controller: _nombreController,
+                    labelText: 'Nombre',
+                    icon: Icons.person,
+                    keyboardType: TextInputType.text,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildField(
+                    controller: _apellidoController,
+                    labelText: 'Apellido',
+                    icon: Icons.person_outline,
+                    keyboardType: TextInputType.text,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildField(
+                    controller: _telefonoController,
+                    labelText: 'Número de teléfono',
+                    icon: Icons.phone,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildField(
+                    controller: _emailController,
+                    labelText: 'Correo electrónico',
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildPasswordField(),
+                  const SizedBox(height: 20),
+                  _buildRoleDropdown(),
+                  const SizedBox(height: 32),
+                  Container(
+                    width: double.infinity,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [Colors.tealAccent, Colors.teal],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.tealAccent.withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _register,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: _loading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.person_add, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Registrarse',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          MouseRegion(
+            onEnter: (_) => setState(() => _isHoveringLogin = true),
+            onExit: (_) => setState(() => _isHoveringLogin = false),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "¿Ya tienes cuenta? ",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 16,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Text(
+                      "Inicia Sesión",
+                      style: TextStyle(
+                        color: _isHoveringLogin
+                            ? Colors.tealAccent.shade100
+                            : Colors.tealAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        decoration: _isHoveringLogin
+                            ? TextDecoration.underline
+                            : TextDecoration.none,
+                        decorationColor: Colors.tealAccent,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    required TextInputType keyboardType,
+  }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -336,7 +371,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         keyboardType: keyboardType,
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
-          labelText: label,
+          labelText: labelText,
           labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
           prefixIcon: Icon(icon, color: Colors.tealAccent),
           border: InputBorder.none,
@@ -346,7 +381,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget buildPasswordField() {
+  Widget _buildPasswordField() {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -363,17 +398,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
           prefixIcon: const Icon(Icons.lock_outline, color: Colors.tealAccent),
           suffixIcon: IconButton(
             icon: Icon(
-              _obscurePassword ? Icons.visibility : Icons.visibility_off,
-              color: Colors.white70,
+              _obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              color: Colors.white.withOpacity(0.8),
             ),
-            onPressed: () {
-              setState(() {
-                _obscurePassword = !_obscurePassword;
-              });
-            },
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withOpacity(0.15),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        child: Row(
+          children: [
+            Icon(Icons.work_outline, color: Colors.tealAccent),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedRole,
+                  dropdownColor: Colors.teal[800],
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  isExpanded: true,
+                  hint: Text(
+                    'Seleccionar rol',
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'veterinario',
+                      child: Text('Veterinario'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'administrador',
+                      child: Text('Administrador'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedRole = value!);
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
