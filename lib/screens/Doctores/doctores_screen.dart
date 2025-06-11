@@ -29,212 +29,415 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
-      appBar: AppBar(
-        title: const Text('Lista de Doctores'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                // Buscador por nombre
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Buscar por nombre',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    fillColor: Colors.white,
-                    filled: true,
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
-                const SizedBox(height: 10),
-                // Filtro por especialidad
-                DropdownButtonFormField<String>(
-                  value: especialidadSeleccionada,
-                  hint: const Text('Filtrar por especialidad'),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Todas las especialidades'),
-                    ),
-                    ...especialidades.map(
-                      (esp) => DropdownMenuItem(value: esp, child: Text(esp)),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      especialidadSeleccionada = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    fillColor: Colors.white,
-                    filled: true,
-                  ),
-                ),
-              ],
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo-huellas.webp'),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('doctores')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('No hay doctores registrados'),
-                  );
-                }
-
-                final doctoresDocs = snapshot.data!.docs.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final nombre = data['nombre']?.toString().toLowerCase() ?? '';
-                  final especialidad =
-                      data['especialidad']?.toString().toLowerCase() ?? '';
-                  final filtroNombre = _searchController.text
-                      .toLowerCase()
-                      .trim();
-                  final filtroEspecialidad = especialidadSeleccionada
-                      ?.toLowerCase();
-
-                  final coincideNombre = nombre.contains(filtroNombre);
-                  final coincideEspecialidad =
-                      filtroEspecialidad == null ||
-                      filtroEspecialidad == especialidad;
-
-                  return coincideNombre && coincideEspecialidad;
-                }).toList();
-
-                if (doctoresDocs.isEmpty) {
-                  return const Center(
-                    child: Text('No se encontraron resultados'),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: doctoresDocs.length,
-                  itemBuilder: (context, index) {
-                    final doctorDoc = doctoresDocs[index];
-                    final doctorData = doctorDoc.data() as Map<String, dynamic>;
-
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+          // Dark Overlay
+          Container(
+            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+          ),
+          // Main Content
+          Column(
+            children: [
+              // AppBar
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 24,
+                  right: 24,
+                  bottom: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Doctores',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      elevation: 5,
-                      color: Colors.white,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 20,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Nombre: ${doctorData['nombre']}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.medical_services, color: Colors.white),
+                  ],
+                ),
+              ),
+
+              // Content
+              Expanded(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        children: [
+                          // Buscador por nombre
+                          TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Buscar por nombre...',
+                              prefixIcon: const Icon(
+                                Icons.search,
                                 color: Colors.teal,
                               ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Especialidad: ${doctorData['especialidad']}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              'Correo: ${doctorData['correo']}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              'Teléfono: ${doctorData['telefono']}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            EditarDoctorScreen(
-                                              doctorId: doctorDoc.id,
-                                              doctorData: doctorData,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.edit),
-                                  label: const Text('Editar'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                      horizontal: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                          const SizedBox(height: 12),
+                          // Filtro por especialidad
+                          DropdownButtonFormField<String>(
+                            value: especialidadSeleccionada,
+                            hint: const Text('Filtrar por especialidad'),
+                            items: [
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('Todas las especialidades'),
+                              ),
+                              ...especialidades.map(
+                                (esp) => DropdownMenuItem(
+                                  value: esp,
+                                  child: Text(esp),
                                 ),
-                                const SizedBox(width: 10),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    _confirmarEliminacion(
-                                      context,
-                                      doctorDoc.id,
-                                    );
-                                  },
-                                  icon: const Icon(Icons.delete),
-                                  label: const Text('Eliminar'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                      horizontal: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                especialidadSeleccionada = value;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                                horizontal: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
+                    Expanded(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('doctores')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text('Error: ${snapshot.error}'),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'No hay doctores registrados',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            );
+                          }
+
+                          final doctoresDocs = snapshot.data!.docs.where((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final nombre =
+                                data['nombre']?.toString().toLowerCase() ?? '';
+                            final especialidad =
+                                data['especialidad']
+                                    ?.toString()
+                                    .toLowerCase() ??
+                                '';
+                            final filtroNombre = _searchController.text
+                                .toLowerCase()
+                                .trim();
+                            final filtroEspecialidad = especialidadSeleccionada
+                                ?.toLowerCase();
+
+                            final coincideNombre = nombre.contains(
+                              filtroNombre,
+                            );
+                            final coincideEspecialidad =
+                                filtroEspecialidad == null ||
+                                filtroEspecialidad == especialidad;
+
+                            return coincideNombre && coincideEspecialidad;
+                          }).toList();
+
+                          if (doctoresDocs.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'No se encontraron resultados',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            itemCount: doctoresDocs.length,
+                            itemBuilder: (context, index) {
+                              final doctorDoc = doctoresDocs[index];
+                              final doctorData =
+                                  doctorDoc.data() as Map<String, dynamic>;
+
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: Colors.white.withOpacity(
+                                    0.15,
+                                  ), // Efecto glassmorphism
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(
+                                      0.3,
+                                    ), // Borde semi-transparente
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: isWide
+                                    ? Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 35,
+                                            backgroundColor: Colors.teal[100],
+                                            child: Text(
+                                              doctorData['nombre']?[0]
+                                                      ?.toUpperCase() ??
+                                                  'D',
+                                              style: const TextStyle(
+                                                fontSize: 24,
+                                                color: Colors.teal,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  doctorData['nombre'] ??
+                                                      'Sin nombre',
+                                                  style: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Wrap(
+                                                  spacing: 30,
+                                                  runSpacing: 8,
+                                                  children: [
+                                                    _infoItem(
+                                                      Icons.medical_services,
+                                                      'Especialidad: ${doctorData['especialidad'] ?? ''}',
+                                                    ),
+                                                    _infoItem(
+                                                      Icons.email,
+                                                      'Correo: ${doctorData['correo'] ?? ''}',
+                                                    ),
+                                                    _infoItem(
+                                                      Icons.phone,
+                                                      'Tel: ${doctorData['telefono'] ?? ''}',
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit,
+                                                  color: Colors.orange,
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          EditarDoctorScreen(
+                                                            doctorId:
+                                                                doctorDoc.id,
+                                                            doctorData:
+                                                                doctorData,
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                ),
+                                                onPressed: () {
+                                                  _confirmarEliminacion(
+                                                    context,
+                                                    doctorDoc.id,
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                    : Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 30,
+                                                backgroundColor:
+                                                    Colors.teal[100],
+                                                child: Text(
+                                                  doctorData['nombre']?[0]
+                                                          ?.toUpperCase() ??
+                                                      'D',
+                                                  style: const TextStyle(
+                                                    fontSize: 24,
+                                                    color: Colors.teal,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text(
+                                                  doctorData['nombre'] ??
+                                                      'Sin nombre',
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit,
+                                                  color: Colors.orange,
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          EditarDoctorScreen(
+                                                            doctorId:
+                                                                doctorDoc.id,
+                                                            doctorData:
+                                                                doctorData,
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                ),
+                                                onPressed: () {
+                                                  _confirmarEliminacion(
+                                                    context,
+                                                    doctorDoc.id,
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 12),
+                                          _infoItem(
+                                            Icons.medical_services,
+                                            'Especialidad: ${doctorData['especialidad'] ?? ''}',
+                                          ),
+                                          _infoItem(
+                                            Icons.email,
+                                            'Correo: ${doctorData['correo'] ?? ''}',
+                                          ),
+                                          _infoItem(
+                                            Icons.phone,
+                                            'Teléfono: ${doctorData['telefono'] ?? ''}',
+                                          ),
+                                        ],
+                                      ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.teal,
         onPressed: () {
           Navigator.push(
             context,
@@ -243,9 +446,20 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
             ),
           );
         },
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text("Agregar Doctor"),
       ),
+    );
+  }
+
+  Widget _infoItem(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.tealAccent, size: 20),
+        const SizedBox(width: 6),
+        Text(text, style: const TextStyle(fontSize: 15, color: Colors.white)),
+      ],
     );
   }
 
@@ -277,3 +491,4 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
     );
   }
 }
+//✅

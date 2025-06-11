@@ -43,186 +43,189 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isWeb = size.width > 900;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF0F172A),
-              const Color(0xFF1E293B),
-              const Color(0xFF334155),
-            ],
-          ),
-        ),
-        child: Column(
-          children: [
-            // Custom App Bar
-            Container(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 16,
-                left: 24,
-                right: 24,
-                bottom: 24,
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo-huellas.webp'),
+                fit: BoxFit.cover,
               ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.teal.withOpacity(0.8),
-                    Colors.tealAccent.withOpacity(0.6),
+            ),
+          ),
+          // Dark Overlay
+          Container(
+            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+          ),
+          // Main Content
+          Column(
+            children: [
+              // Custom App Bar
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 24,
+                  right: 24,
+                  bottom: 24,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
                   ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Logo Section
-                  Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [Colors.white, Colors.teal.shade100],
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.pets,
-                                color: Colors.teal,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Pets & Health',
-                              style: TextStyle(
-                                fontSize: 24,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    offset: Offset(0, 2),
-                                    blurRadius: 4,
-                                    color: Colors.black26,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(duration: 800.ms)
-                      .slideX(begin: -0.3, end: 0),
-
-                  const Spacer(),
-
-                  // User Info
-                  GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ProfileScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
+                child: Row(
+                  children: [
+                    // Logo Section
+                    Container(
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
-                            ),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(8),
+                                width: 50,
+                                height: 50,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
                                   shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.white,
+                                      Colors.teal.shade100,
+                                    ],
+                                  ),
                                 ),
                                 child: const Icon(
-                                  Icons.account_circle,
-                                  color: Colors.white,
-                                  size: 20,
+                                  Icons.pets,
+                                  color: Colors.teal,
+                                  size: 28,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                widget.role.toUpperCase(),
-                                style: const TextStyle(
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Pets & Health',
+                                style: TextStyle(
+                                  fontSize: 24,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(0, 2),
+                                      blurRadius: 4,
+                                      color: Colors.black26,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(delay: 400.ms, duration: 600.ms)
-                      .slideX(begin: 0.3, end: 0),
+                        )
+                        .animate()
+                        .fadeIn(duration: 800.ms)
+                        .slideX(begin: -0.3, end: 0),
 
-                  const SizedBox(width: 16),
+                    const Spacer(),
 
-                  // Logout Button
-                  Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.red.withOpacity(0.3),
+                    // User Info
+                    GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ProfileScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.account_circle,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.role.toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.exit_to_app,
-                            color: Colors.white,
-                          ),
-                          onPressed: () => _logout(context),
-                          tooltip: 'Cerrar Sesión',
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(delay: 600.ms, duration: 600.ms)
-                      .scale(begin: const Offset(0.8, 0.8)),
-                ],
-              ),
-            ),
+                        )
+                        .animate()
+                        .fadeIn(delay: 400.ms, duration: 600.ms)
+                        .slideX(begin: 0.3, end: 0),
 
-            // Dashboard Content
-            Expanded(
-              child: Container(
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _buildDashboard(isWeb),
+                    const SizedBox(width: 16),
+
+                    // Logout Button
+                    Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.red.withOpacity(0.3),
+                            ),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.exit_to_app,
+                              color: Colors.white,
+                            ),
+                            onPressed: () => _logout(context),
+                            tooltip: 'Cerrar Sesión',
+                          ),
+                        )
+                        .animate()
+                        .fadeIn(delay: 600.ms, duration: 600.ms)
+                        .scale(begin: const Offset(0.8, 0.8)),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+
+              // Dashboard Content
+              Expanded(
+                child: Container(
+                  child: _isLoading
+                      ? _buildLoadingState()
+                      : _buildDashboard(isWeb),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -319,9 +322,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             margin: const EdgeInsets.only(bottom: 32),
             decoration: BoxDecoration(
               gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  Colors.teal.withOpacity(0.2),
-                  Colors.tealAccent.withOpacity(0.1),
+                  const Color(0xFF0F172A),
+                  const Color(0xFF1E293B),
+                  const Color(0xFF334155),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
@@ -385,14 +391,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                item.color.withOpacity(0.8),
-                item.color.withOpacity(0.6),
-              ],
-            ),
+            color: item.color,
             boxShadow: [
               BoxShadow(
                 color: item.color.withOpacity(0.3),

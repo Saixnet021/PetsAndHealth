@@ -16,124 +16,225 @@ class _CitasScreenState extends State<CitasScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
-      appBar: AppBar(
-        title: const Text('Lista de Citas'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Buscar...',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: _filtro,
-                  items: const [
-                    DropdownMenuItem(value: 'cliente', child: Text('Cliente')),
-                    DropdownMenuItem(value: 'doctor', child: Text('Doctor')),
-                    DropdownMenuItem(value: 'fecha', child: Text('Fecha')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _filtro = value;
-                      });
-                    }
-                  },
-                ),
-              ],
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo-huellas.webp'),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('citas')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No hay citas registradas'));
-                }
+          // Dark Overlay
+          Container(
+            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+          ),
+          // Main Content
+          Column(
+            children: [
+              // AppBar
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 24,
+                  right: 24,
+                  bottom: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Citas',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.calendar_today, color: Colors.white),
+                  ],
+                ),
+              ),
 
-                final citasDocs = snapshot.data!.docs;
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: citasDocs.length,
-                  itemBuilder: (context, index) {
-                    final citaDoc = citasDocs[index];
-                    final citaData = citaDoc.data() as Map<String, dynamic>;
-
-                    return FutureBuilder<Map<String, String>>(
-                      future: _obtenerDatosRelacionados(citaData),
-                      builder: (context, relatedSnapshot) {
-                        if (!relatedSnapshot.hasData) {
-                          return const SizedBox();
-                        }
-
-                        final relacionados = relatedSnapshot.data!;
-                        final searchText = _searchController.text
-                            .toLowerCase()
-                            .trim();
-
-                        // FILTRO
-                        bool coincide = true;
-                        if (searchText.isNotEmpty) {
-                          switch (_filtro) {
-                            case 'cliente':
-                              coincide = relacionados['cliente']!
-                                  .toLowerCase()
-                                  .contains(searchText);
-                              break;
-                            case 'doctor':
-                              coincide = relacionados['doctor']!
-                                  .toLowerCase()
-                                  .contains(searchText);
-                              break;
-                            case 'fecha':
-                              coincide = (citaData['fecha'] ?? '')
-                                  .toLowerCase()
-                                  .contains(searchText);
-                              break;
+              // Content
+              Expanded(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Buscar...',
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: Colors.teal,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              onChanged: (value) => setState(() {}),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: DropdownButton<String>(
+                              value: _filtro,
+                              underline: const SizedBox(),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'cliente',
+                                  child: Text('Cliente'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'doctor',
+                                  child: Text('Doctor'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'fecha',
+                                  child: Text('Fecha'),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _filtro = value;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('citas')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text('Error: ${snapshot.error}'),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'No hay citas registradas',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            );
                           }
-                        }
 
-                        if (!coincide) return const SizedBox();
+                          final citasDocs = snapshot.data!.docs;
 
-                        return _buildCitaCard(
-                          context,
-                          citaDoc,
-                          citaData,
-                          relacionados,
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+                          return ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            itemCount: citasDocs.length,
+                            itemBuilder: (context, index) {
+                              final citaDoc = citasDocs[index];
+                              final citaData =
+                                  citaDoc.data() as Map<String, dynamic>;
+
+                              return FutureBuilder<Map<String, String>>(
+                                future: _obtenerDatosRelacionados(citaData),
+                                builder: (context, relatedSnapshot) {
+                                  if (!relatedSnapshot.hasData) {
+                                    return const SizedBox();
+                                  }
+
+                                  final relacionados = relatedSnapshot.data!;
+                                  final searchText = _searchController.text
+                                      .toLowerCase()
+                                      .trim();
+
+                                  // FILTRO
+                                  bool coincide = true;
+                                  if (searchText.isNotEmpty) {
+                                    switch (_filtro) {
+                                      case 'cliente':
+                                        coincide = relacionados['cliente']!
+                                            .toLowerCase()
+                                            .contains(searchText);
+                                        break;
+                                      case 'doctor':
+                                        coincide = relacionados['doctor']!
+                                            .toLowerCase()
+                                            .contains(searchText);
+                                        break;
+                                      case 'fecha':
+                                        coincide = (citaData['fecha'] ?? '')
+                                            .toLowerCase()
+                                            .contains(searchText);
+                                        break;
+                                    }
+                                  }
+
+                                  if (!coincide) return const SizedBox();
+
+                                  return _buildCitaCard(
+                                    context,
+                                    citaDoc,
+                                    citaData,
+                                    relacionados,
+                                    isWide,
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.teal,
         onPressed: () {
           Navigator.push(
@@ -141,7 +242,8 @@ class _CitasScreenState extends State<CitasScreen> {
             MaterialPageRoute(builder: (context) => const AgregarCitaScreen()),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text("Agregar Cita"),
       ),
     );
   }
@@ -151,146 +253,328 @@ class _CitasScreenState extends State<CitasScreen> {
     QueryDocumentSnapshot citaDoc,
     Map<String, dynamic> citaData,
     Map<String, String> relacionados,
+    bool isWide,
   ) {
     return StatefulBuilder(
       builder: (context, setStateCard) {
         String estadoSeleccionado = citaData['estado'] ?? 'Pendiente';
 
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 5,
-          color: Colors.white,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${citaData['fecha']} a las ${citaData['hora']}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Paciente: ${relacionados['paciente']}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  'Cliente: ${relacionados['cliente']}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  'Doctor: ${relacionados['doctor']}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  'Motivo: ${citaData['motivo']}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Text('Estado:', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 10),
-                    DropdownButton<String>(
-                      value: estadoSeleccionado,
-                      items: ['Pendiente', 'Confirmada', 'Cancelada']
-                          .map(
-                            (estado) => DropdownMenuItem(
-                              value: estado,
-                              child: Text(estado),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (nuevoEstado) async {
-                        if (nuevoEstado != null) {
-                          setStateCard(() {
-                            estadoSeleccionado = nuevoEstado;
-                          });
+        // Determinar color del estado
+        Color estadoColor = Colors.orange;
+        if (estadoSeleccionado == 'Confirmada') {
+          estadoColor = Colors.green;
+        } else if (estadoSeleccionado == 'Cancelada') {
+          estadoColor = Colors.red;
+        }
 
-                          await FirebaseFirestore.instance
-                              .collection('citas')
-                              .doc(citaDoc.id)
-                              .update({'estado': nuevoEstado});
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Estado actualizado a "$nuevoEstado"',
-                              ),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await FirebaseFirestore.instance
-                            .collection('citas')
-                            .doc(citaDoc.id)
-                            .update({'estado': estadoSeleccionado});
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Estado actualizado correctamente'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                      ),
-                      child: const Text('Actualizar'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditarCitaScreen(
-                              citaId: citaDoc.id,
-                              citaData: citaData,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Editar'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _confirmarEliminacion(context, citaDoc.id);
-                      },
-                      icon: const Icon(Icons.delete),
-                      label: const Text('Eliminar'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white.withOpacity(0.15), // Efecto glassmorphism
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3), // Borde semi-transparente
+              width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
           ),
+          child: isWide
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Colors.teal[100],
+                      child: const Icon(
+                        Icons.calendar_today,
+                        color: Colors.teal,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${citaData['fecha']} a las ${citaData['hora']}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 30,
+                            runSpacing: 8,
+                            children: [
+                              _infoItem(
+                                Icons.pets,
+                                'Paciente: ${relacionados['paciente']}',
+                              ),
+                              _infoItem(
+                                Icons.person,
+                                'Cliente: ${relacionados['cliente']}',
+                              ),
+                              _infoItem(
+                                Icons.medical_services,
+                                'Doctor: ${relacionados['doctor']}',
+                              ),
+                              _infoItem(
+                                Icons.description,
+                                'Motivo: ${citaData['motivo']}',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: estadoColor.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: estadoColor),
+                                ),
+                                child: Text(
+                                  'Estado: $estadoSeleccionado',
+                                  style: TextStyle(
+                                    color: estadoColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: DropdownButton<String>(
+                                  value: estadoSeleccionado,
+                                  underline: const SizedBox(),
+                                  items:
+                                      ['Pendiente', 'Confirmada', 'Cancelada']
+                                          .map(
+                                            (estado) => DropdownMenuItem(
+                                              value: estado,
+                                              child: Text(estado),
+                                            ),
+                                          )
+                                          .toList(),
+                                  onChanged: (nuevoEstado) async {
+                                    if (nuevoEstado != null) {
+                                      setStateCard(() {
+                                        estadoSeleccionado = nuevoEstado;
+                                      });
+
+                                      await FirebaseFirestore.instance
+                                          .collection('citas')
+                                          .doc(citaDoc.id)
+                                          .update({'estado': nuevoEstado});
+
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Estado actualizado a "$nuevoEstado"',
+                                          ),
+                                          duration: const Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.orange),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarCitaScreen(
+                                  citaId: citaDoc.id,
+                                  citaData: citaData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _confirmarEliminacion(context, citaDoc.id);
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.teal[100],
+                          child: const Icon(
+                            Icons.calendar_today,
+                            color: Colors.teal,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            '${citaData['fecha']} - ${citaData['hora']}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.orange),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarCitaScreen(
+                                  citaId: citaDoc.id,
+                                  citaData: citaData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _confirmarEliminacion(context, citaDoc.id);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _infoItem(
+                      Icons.pets,
+                      'Paciente: ${relacionados['paciente']}',
+                    ),
+                    _infoItem(
+                      Icons.person,
+                      'Cliente: ${relacionados['cliente']}',
+                    ),
+                    _infoItem(
+                      Icons.medical_services,
+                      'Doctor: ${relacionados['doctor']}',
+                    ),
+                    _infoItem(
+                      Icons.description,
+                      'Motivo: ${citaData['motivo']}',
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: estadoColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: estadoColor),
+                          ),
+                          child: Text(
+                            estadoSeleccionado,
+                            style: TextStyle(
+                              color: estadoColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<String>(
+                            value: estadoSeleccionado,
+                            underline: const SizedBox(),
+                            items: ['Pendiente', 'Confirmada', 'Cancelada']
+                                .map(
+                                  (estado) => DropdownMenuItem(
+                                    value: estado,
+                                    child: Text(estado),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (nuevoEstado) async {
+                              if (nuevoEstado != null) {
+                                setStateCard(() {
+                                  estadoSeleccionado = nuevoEstado;
+                                });
+
+                                await FirebaseFirestore.instance
+                                    .collection('citas')
+                                    .doc(citaDoc.id)
+                                    .update({'estado': nuevoEstado});
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Estado actualizado a "$nuevoEstado"',
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
         );
       },
+    );
+  }
+
+  Widget _infoItem(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.tealAccent, size: 20),
+        const SizedBox(width: 6),
+        Text(text, style: const TextStyle(fontSize: 15, color: Colors.white)),
+      ],
     );
   }
 
@@ -343,3 +627,4 @@ class _CitasScreenState extends State<CitasScreen> {
     );
   }
 }
+//✅
