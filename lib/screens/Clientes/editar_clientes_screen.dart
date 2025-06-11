@@ -20,6 +20,7 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
   late TextEditingController _nombreController;
   late TextEditingController _correoController;
   late TextEditingController _telefonoController;
+  late TextEditingController _direccionController;
 
   @override
   void initState() {
@@ -33,6 +34,9 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
     _telefonoController = TextEditingController(
       text: widget.clienteData['telefono'],
     );
+    _direccionController = TextEditingController(
+      text: widget.clienteData['direccion'] ?? '',
+    );
   }
 
   @override
@@ -40,6 +44,7 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
     _nombreController.dispose();
     _correoController.dispose();
     _telefonoController.dispose();
+    _direccionController.dispose();
     super.dispose();
   }
 
@@ -54,6 +59,7 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
               'nombre': _nombreController.text,
               'correo': _correoController.text,
               'telefono': _telefonoController.text,
+              'direccion': _direccionController.text,
             });
 
         // Volver a la pantalla anterior
@@ -61,17 +67,16 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
       } catch (e) {
         showDialog(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Error'),
-                content: Text('Hubo un problema al actualizar el cliente: $e'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Aceptar'),
-                  ),
-                ],
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Hubo un problema al actualizar el cliente: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Aceptar'),
               ),
+            ],
+          ),
         );
       }
     }
@@ -121,6 +126,17 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese un número de teléfono';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _direccionController,
+                decoration: const InputDecoration(labelText: 'Dirección'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese una dirección';
                   }
                   return null;
                 },

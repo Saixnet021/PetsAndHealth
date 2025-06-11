@@ -30,8 +30,17 @@ Route createRouteToRegister() {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  /*
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();*/
+  //log temporallll
+  final TextEditingController _emailController = TextEditingController(
+    text: 'dev@dev.com',
+  );
+  final TextEditingController _passwordController = TextEditingController(
+    text: 'devdevdev',
+  );
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _loading = false;
   bool _obscurePassword = true;

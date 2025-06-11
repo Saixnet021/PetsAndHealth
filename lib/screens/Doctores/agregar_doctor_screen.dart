@@ -11,37 +11,48 @@ class AgregarDoctorScreen extends StatefulWidget {
 class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _especialidadController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
+
+  String? _especialidadSeleccionada;
+
+  final List<String> especialidades = [
+    'Veterinario General',
+    'Cirujano Veterinario',
+    'Dermatólogo Veterinario',
+    'Cardiólogo Veterinario',
+    'Oftalmólogo Veterinario',
+    'Oncólogo Veterinario',
+    'Especialista en Animales Exóticos',
+    'Etólogo (Conductista Animal)',
+    'Odontólogo Veterinario',
+    'Zootecnista (Nutrición y Producción Animal)',
+  ];
 
   void _guardarDoctor() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Agregar el nuevo doctor a Firestore
         await FirebaseFirestore.instance.collection('doctores').add({
           'nombre': _nombreController.text,
-          'especialidad': _especialidadController.text,
+          'especialidad': _especialidadSeleccionada,
           'correo': _correoController.text,
           'telefono': _telefonoController.text,
         });
 
-        // Volver a la pantalla anterior
         Navigator.pop(context);
       } catch (e) {
         showDialog(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Error'),
-                content: Text('Hubo un problema al agregar el doctor: $e'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Aceptar'),
-                  ),
-                ],
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Hubo un problema al agregar el doctor: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Aceptar'),
               ),
+            ],
+          ),
         );
       }
     }
@@ -71,12 +82,23 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
                 },
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _especialidadController,
+              DropdownButtonFormField<String>(
+                value: _especialidadSeleccionada,
                 decoration: const InputDecoration(labelText: 'Especialidad'),
+                items: especialidades.map((especialidad) {
+                  return DropdownMenuItem(
+                    value: especialidad,
+                    child: Text(especialidad),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _especialidadSeleccionada = value;
+                  });
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese una especialidad';
+                    return 'Por favor seleccione una especialidad';
                   }
                   return null;
                 },

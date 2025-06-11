@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class EditarPacienteScreen extends StatefulWidget {
   final String pacienteId;
@@ -24,6 +28,10 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
 
   List<DocumentSnapshot> clientes = [];
 
+  Uint8List? imagenSeleccionada;
+  XFile? pickedXFile;
+  String? fotoUrlExistente;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +44,7 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
     especie = widget.pacienteData['especie'] ?? '';
     raza = widget.pacienteData['raza'] ?? '';
     clienteId = widget.pacienteData['clienteId'];
+    fotoUrlExistente = widget.pacienteData['fotoUrl'];
     final timestamp = widget.pacienteData['fechaNacimiento'];
     if (timestamp is Timestamp) {
       fechaNacimiento = timestamp.toDate();
@@ -43,11 +52,52 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
   }
 
   Future<void> cargarClientes() async {
-    final clientesSnap =
-        await FirebaseFirestore.instance.collection('clientes').get();
+    final clientesSnap = await FirebaseFirestore.instance
+        .collection('clientes')
+        .get();
     setState(() {
       clientes = clientesSnap.docs;
     });
+  }
+
+  Future<void> seleccionarImagen() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      final bytes = await picked.readAsBytes();
+      setState(() {
+        imagenSeleccionada = bytes;
+        pickedXFile = picked;
+      });
+    }
+  }
+
+  Future<String?> subirImagenAPostImages(Uint8List imagenBytes) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(
+        'https://api.imgbb.com/1/upload?key=3639ea52757bc8f6b3e480be199d5cdf',
+      ),
+    );
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'image',
+        imagenBytes,
+        filename: 'imagen.jpg',
+      ),
+    );
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      final data = json.decode(responseBody);
+      return data['data']['url'];
+    } else {
+      print('Error al subir imagen: $responseBody');
+      return null;
+    }
   }
 
   Future<void> actualizarPaciente() async {
@@ -62,6 +112,12 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
       return;
     }
 
+    String? nuevaUrl = fotoUrlExistente;
+
+    if (imagenSeleccionada != null) {
+      nuevaUrl = await subirImagenAPostImages(imagenSeleccionada!);
+    }
+
     await FirebaseFirestore.instance
         .collection('pacientes')
         .doc(widget.pacienteId)
@@ -71,6 +127,7 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
           'raza': raza,
           'fechaNacimiento': Timestamp.fromDate(fechaNacimiento!),
           'clienteId': clienteId,
+          'fotoUrl': nuevaUrl ?? '',
         });
 
     Navigator.pop(context);
@@ -87,92 +144,125 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, 4),
+        child: ListView(
+          children: [
+            // Imagen
+            GestureDetector(
+              onTap: seleccionarImagen,
+              child: imagenSeleccionada != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.memory(
+                        imagenSeleccionada!,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : fotoUrlExistente != null && fotoUrlExistente!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        fotoUrlExistente!,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Text('Toca para seleccionar imagen'),
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 16),
+
+            DropdownButtonFormField<String>(
+              value: clienteId,
+              decoration: const InputDecoration(labelText: 'Cliente'),
+              items: clientes.map((cliente) {
+                return DropdownMenuItem(
+                  value: cliente.id,
+                  child: Text(cliente['nombre']),
+                );
+              }).toList(),
+              onChanged: (value) => setState(() => clienteId = value),
+            ),
+            const SizedBox(height: 10),
+
+            TextFormField(
+              initialValue: nombre,
+              decoration: const InputDecoration(labelText: 'Nombre'),
+              onChanged: (value) => nombre = value,
+            ),
+            const SizedBox(height: 10),
+
+            TextFormField(
+              initialValue: especie,
+              decoration: const InputDecoration(labelText: 'Especie'),
+              onChanged: (value) => especie = value,
+            ),
+            const SizedBox(height: 10),
+
+            TextFormField(
+              initialValue: raza,
+              decoration: const InputDecoration(labelText: 'Raza'),
+              onChanged: (value) => raza = value,
+            ),
+            const SizedBox(height: 10),
+
+            ElevatedButton.icon(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: fechaNacimiento ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null) {
+                  setState(() {
+                    fechaNacimiento = picked;
+                  });
+                }
+              },
+              icon: const Icon(Icons.calendar_today),
+              label: Text(
+                fechaNacimiento == null
+                    ? 'Seleccionar Fecha de Nacimiento'
+                    : '${fechaNacimiento!.toLocal()}'.split(' ')[0],
               ),
-            ],
-          ),
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: nombre,
-                decoration: const InputDecoration(labelText: 'Nombre'),
-                onChanged: (value) => nombre = value,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                initialValue: especie,
-                decoration: const InputDecoration(labelText: 'Especie'),
-                onChanged: (value) => especie = value,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                initialValue: raza,
-                decoration: const InputDecoration(labelText: 'Raza'),
-                onChanged: (value) => raza = value,
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: fechaNacimiento ?? DateTime(2015),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      fechaNacimiento = picked;
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
                 ),
-                child: Text(
-                  fechaNacimiento == null
-                      ? 'Seleccionar Fecha de Nacimiento'
-                      : 'Fecha de Nacimiento: ${fechaNacimiento!.toLocal()}'
-                          .split(' ')[0],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: clienteId,
-                decoration: const InputDecoration(labelText: 'Cliente'),
-                items:
-                    clientes.map((cliente) {
-                      return DropdownMenuItem(
-                        value: cliente.id,
-                        child: Text(cliente['nombre']),
-                      );
-                    }).toList(),
-                onChanged: (value) => setState(() => clienteId = value),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: actualizarPaciente,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF28A745),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            const SizedBox(height: 20),
+
+            ElevatedButton.icon(
+              onPressed: actualizarPaciente,
+              icon: const Icon(Icons.save),
+              label: const Text('Actualizar Paciente'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
                 ),
-                child: const Text(
-                  'Actualizar Paciente',
-                  style: TextStyle(fontSize: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

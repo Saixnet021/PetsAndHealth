@@ -16,6 +16,8 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
+  final TextEditingController _direccionController =
+      TextEditingController(); // Nuevo controlador
 
   bool _cargando = false;
 
@@ -80,6 +82,7 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
           'nombre': _nombreController.text.trim(),
           'correo': _correoController.text.trim(),
           'telefono': _telefonoController.text.trim(),
+          'direccion': _direccionController.text.trim(), // Guardar dirección
         });
 
         Navigator.pop(context);
@@ -87,6 +90,16 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
         _mostrarError('Hubo un problema al agregar el cliente: $e');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _dniController.dispose();
+    _nombreController.dispose();
+    _correoController.dispose();
+    _telefonoController.dispose();
+    _direccionController.dispose(); // Dispose del nuevo controlador
+    super.dispose();
   }
 
   @override
@@ -168,6 +181,17 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese un número de teléfono';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _direccionController,
+                decoration: const InputDecoration(labelText: 'Dirección'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese una dirección';
                   }
                   return null;
                 },

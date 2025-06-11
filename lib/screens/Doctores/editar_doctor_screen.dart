@@ -18,9 +18,22 @@ class EditarDoctorScreen extends StatefulWidget {
 class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nombreController;
-  late TextEditingController _especialidadController;
   late TextEditingController _correoController;
   late TextEditingController _telefonoController;
+  String? _especialidadSeleccionada;
+
+  final List<String> especialidades = [
+    'Veterinario General',
+    'Cirujano Veterinario',
+    'Dermatólogo Veterinario',
+    'Cardiólogo Veterinario',
+    'Oftalmólogo Veterinario',
+    'Oncólogo Veterinario',
+    'Especialista en Animales Exóticos',
+    'Etólogo (Conductista Animal)',
+    'Odontólogo Veterinario',
+    'Zootecnista (Nutrición y Producción Animal)',
+  ];
 
   @override
   void initState() {
@@ -28,21 +41,18 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
     _nombreController = TextEditingController(
       text: widget.doctorData['nombre'],
     );
-    _especialidadController = TextEditingController(
-      text: widget.doctorData['especialidad'],
-    );
     _correoController = TextEditingController(
       text: widget.doctorData['correo'],
     );
     _telefonoController = TextEditingController(
       text: widget.doctorData['telefono'],
     );
+    _especialidadSeleccionada = widget.doctorData['especialidad'];
   }
 
   @override
   void dispose() {
     _nombreController.dispose();
-    _especialidadController.dispose();
     _correoController.dispose();
     _telefonoController.dispose();
     super.dispose();
@@ -56,7 +66,7 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
             .doc(widget.doctorId)
             .update({
               'nombre': _nombreController.text,
-              'especialidad': _especialidadController.text,
+              'especialidad': _especialidadSeleccionada,
               'correo': _correoController.text,
               'telefono': _telefonoController.text,
             });
@@ -86,8 +96,7 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               TextFormField(
                 controller: _nombreController,
@@ -100,15 +109,23 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _especialidadController,
+              DropdownButtonFormField<String>(
+                value: _especialidadSeleccionada,
                 decoration: const InputDecoration(labelText: 'Especialidad'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa la especialidad';
-                  }
-                  return null;
+                items: especialidades.map((especialidad) {
+                  return DropdownMenuItem<String>(
+                    value: especialidad,
+                    child: Text(especialidad),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _especialidadSeleccionada = value;
+                  });
                 },
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Por favor selecciona una especialidad'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(

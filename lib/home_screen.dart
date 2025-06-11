@@ -133,43 +133,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   const Spacer(),
 
                   // User Info
-                  Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
+                  GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ProfileScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.account_circle,
-                                color: Colors.white,
-                                size: 20,
-                              ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(25),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              widget.role.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.account_circle,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                widget.role.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                       .animate()
@@ -285,20 +295,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           MaterialPageRoute(builder: (_) => const ClientesScreen()),
         ),
       ),
-      DashboardItem(
-        icon: Icons.account_circle,
-        title: 'Perfil',
-        color: const Color(0xFFEF4444),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ProfileScreen()),
-        ),
-      ),
       if (widget.role == 'administrador')
         DashboardItem(
           icon: Icons.supervised_user_circle,
           title: 'Usuarios',
-          color: const Color(0xFF06B6D4),
+          color: const Color(0xFFEF4444),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const UsuariosScreen()),
