@@ -16,10 +16,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // Controladores de texto
   final TextEditingController _emailController = TextEditingController(
-    text: 'dev@dev.com',
+    text: '',
   );
   final TextEditingController _passwordController = TextEditingController(
-    text: 'devdevdev',
+    text: '',
   );
 
   // Controlador de login
