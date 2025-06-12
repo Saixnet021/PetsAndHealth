@@ -123,15 +123,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (await canLaunchUrl(url)) {
                       await launchUrl(
                         url,
-                        mode: LaunchMode.externalApplication,
+                        mode: LaunchMode
+                            .platformDefault, // Más seguro en Flutter Web
                       );
                     }
                   },
                   child: const Text(
                     'Click to view Developers',
                     style: TextStyle(
-                      color: Color(0xFF48E1C2), // Color personalizado
-                      fontSize: 20, // Tamaño más grande
+                      color: Color(0xFF48E1C2),
+                      fontSize: 20,
                       decoration: TextDecoration.underline,
                     ),
                   ),
