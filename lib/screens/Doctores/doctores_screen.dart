@@ -141,7 +141,7 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
                     // Filtro por especialidad
                     DropdownButtonFormField<String>(
                       value: especialidadSeleccionada,
-                      dropdownColor: Colors.teal[800],
+                      dropdownColor: Colors.black87,
                       iconEnabledColor: Colors.white,
                       hint: const Text(
                         'Filtrar por especialidad',
@@ -404,7 +404,7 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
           horizontal: 12,
         ),
       ),
-      dropdownColor: Colors.white,
+      dropdownColor: Colors.black87,
     );
   }
 

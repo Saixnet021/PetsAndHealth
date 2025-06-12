@@ -43,40 +43,57 @@ class _CitasScreenState extends State<CitasScreen> {
           Column(
             children: [
               // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Cita',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Citas',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AgregarCitaScreen(),
+                          ),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.tealAccent,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.tealAccent),
+                        ),
                       ),
+                      icon: const Icon(Icons.calendar_today),
+                      label: const Text("Crear"),
                     ),
-                    const Spacer(),
-                    const Icon(Icons.calendar_today, color: Colors.white),
                   ],
                 ),
               ),
@@ -86,20 +103,27 @@ class _CitasScreenState extends State<CitasScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(14.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: _searchController,
+                              style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
-                                hintText: 'Buscar...',
+                                hintText: 'Buscar por nombre o DNI...',
+                                hintStyle: TextStyle(
+                                  color: Colors.white.withOpacity(0.6),
+                                ),
                                 prefixIcon: const Icon(
                                   Icons.search,
-                                  color: Colors.teal,
+                                  color: Colors.tealAccent,
                                 ),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: Colors.white.withOpacity(0.1),
                                 contentPadding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
@@ -115,10 +139,13 @@ class _CitasScreenState extends State<CitasScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Colors.white.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: DropdownButton<String>(
+                              dropdownColor: Colors.black87,
+                              style: const TextStyle(color: Colors.white),
+                              iconEnabledColor: Colors.tealAccent,
                               value: _filtro,
                               underline: const SizedBox(),
                               items: const [
@@ -147,6 +174,7 @@ class _CitasScreenState extends State<CitasScreen> {
                         ],
                       ),
                     ),
+
                     Expanded(
                       child: StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
@@ -238,17 +266,6 @@ class _CitasScreenState extends State<CitasScreen> {
             ],
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.teal,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AgregarCitaScreen()),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Agregar Cita"),
       ),
     );
   }
@@ -366,10 +383,13 @@ class _CitasScreenState extends State<CitasScreen> {
                                   horizontal: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: DropdownButton<String>(
+                                  dropdownColor: Colors.black87,
+                                  style: const TextStyle(color: Colors.white),
+                                  iconEnabledColor: Colors.tealAccent,
                                   value: estadoSeleccionado,
                                   underline: const SizedBox(),
                                   items:

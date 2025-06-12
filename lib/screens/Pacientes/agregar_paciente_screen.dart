@@ -277,6 +277,7 @@ class _AgregarPacienteScreenState extends State<AgregarPacienteScreen> {
                             value: clienteId,
                             dropdownColor: Colors.grey[900],
                             style: const TextStyle(color: Colors.white),
+                            iconEnabledColor: Colors.tealAccent,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.1),

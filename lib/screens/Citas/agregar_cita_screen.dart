@@ -226,7 +226,8 @@ class _AgregarCitaScreenState extends State<AgregarCitaScreen> {
           ),
         ),
         style: const TextStyle(color: Colors.white),
-        dropdownColor: Colors.teal.shade800,
+        dropdownColor: Colors.grey[900],
+        iconEnabledColor: Colors.tealAccent,
         disabledHint: disabledHint != null
             ? Text(disabledHint, style: const TextStyle(color: Colors.white54))
             : null,
@@ -243,73 +244,50 @@ class _AgregarCitaScreenState extends State<AgregarCitaScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
+
           // Main Content
           Column(
             children: [
               // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Agregar Cita',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.white),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'opcion1',
-                          child: Text('Opción 1'),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Agregar Cita',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const PopupMenuItem(
-                          value: 'opcion2',
-                          child: Text('Opción 2'),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        // Aquí puedes manejar las opciones
-                      },
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // Content
@@ -325,14 +303,14 @@ class _AgregarCitaScreenState extends State<AgregarCitaScreen> {
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withOpacity(0.1),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.25),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -499,31 +477,59 @@ class _AgregarCitaScreenState extends State<AgregarCitaScreen> {
                             ),
                           ),
                           const SizedBox(height: 30),
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: todosCamposValidos
-                                  ? guardarCita
-                                  : null,
-                              icon: const Icon(Icons.save, color: Colors.white),
-                              label: const Text(
-                                'Guardar Cita',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
+                          Container(
+                            width: double.infinity,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                colors: [Colors.tealAccent, Colors.teal],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.tealAccent.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (todosCamposValidos) {
+                                  guardarCita();
+                                } else {
+                                  // Opcional: mostrar mensaje de advertencia
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Por favor completa todos los campos.',
+                                      ),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: todosCamposValidos
-                                    ? Colors.orange
-                                    : Colors.orange.withOpacity(0.5),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                  horizontal: 30,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                minimumSize: const Size(160, 45),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.save, color: Colors.white),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Guardar Cita',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),

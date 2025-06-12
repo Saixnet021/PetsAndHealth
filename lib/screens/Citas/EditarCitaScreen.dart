@@ -11,7 +11,6 @@ class EditarCitaScreen extends StatefulWidget {
     required this.citaData,
   });
 
-  @override
   State<EditarCitaScreen> createState() => _EditarCitaScreenState();
 }
 
@@ -19,12 +18,21 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
   String? clienteId;
   String? pacienteId;
   String? doctorId;
-  String motivo = '';
+  String? motivo;
   DateTime? fechaHora;
 
   List<DocumentSnapshot> clientes = [];
   List<DocumentSnapshot> pacientes = [];
   List<DocumentSnapshot> doctores = [];
+  final List<String> motivosPredefinidos = [
+    'Vacunación',
+    'Chequeo general',
+    'Desparasitación',
+    'Cirugía',
+    'Consulta de emergencia',
+    'Consulta dental',
+    'Otro',
+  ];
 
   @override
   void initState() {
@@ -83,7 +91,7 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
         pacienteId == null ||
         doctorId == null ||
         fechaHora == null ||
-        motivo.isEmpty) {
+        motivo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Completa todos los campos')),
       );
@@ -163,41 +171,61 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
     );
   }
 
-  Widget _buildTextField({
-    required String initialValue,
+  Widget _buildDropdownFields({
+    required String? value,
+    required String hint,
     required String label,
-    required IconData icon,
-    required void Function(String) onChanged,
+    required List<DropdownMenuItem<String>> items,
+    required void Function(String?)? onChanged,
+    IconData? icon,
+    bool isLoading = false,
+    bool isEnabled = true,
+    String? disabledHint,
   }) {
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.tealAccent),
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.15), // Efecto glassmorphism
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.tealAccent, width: 2),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withOpacity(0.15),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
       ),
-      style: const TextStyle(color: Colors.white),
-      onChanged: onChanged,
+      child: DropdownButtonFormField<String>(
+        value: value,
+        hint: Text(hint, style: const TextStyle(color: Colors.white70)),
+        items: items,
+        onChanged: isEnabled ? onChanged : null,
+        decoration: InputDecoration(
+          prefixIcon: icon != null
+              ? Icon(icon, color: Colors.tealAccent)
+              : null,
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white),
+          filled: false,
+          counterText: '',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.tealAccent, width: 2),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: const TextStyle(color: Colors.white),
+        dropdownColor: Colors.grey[900],
+        iconEnabledColor: Colors.tealAccent,
+        disabledHint: disabledHint != null
+            ? Text(disabledHint, style: const TextStyle(color: Colors.white54))
+            : null,
+        isExpanded: true,
+      ),
     );
   }
 
@@ -209,47 +237,70 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
+          // Fondo con gradiente
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Dark Overlay
+          // Capa oscura
           Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+            decoration: BoxDecoration(color: Colors.black.withOpacity(0.5)),
           ),
-          // Main Content
+          // Contenido
           Column(
             children: [
-              // AppBar
+              // AppBar personalizado
               Container(
                 padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
+                  left: 20,
+                  right: 20,
                   bottom: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.teal,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0F2027), Color(0xFF2C5364)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     const Text(
                       'Editar Cita',
                       style: TextStyle(
@@ -263,7 +314,7 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
                   ],
                 ),
               ),
-              // Content
+              // Formulario
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
@@ -275,32 +326,31 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
                       ),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: Colors.white.withOpacity(
-                          0.15,
-                        ), // Efecto glassmorphism
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.1),
                         border: Border.all(
-                          color: Colors.white.withOpacity(
-                            0.3,
-                          ), // Borde semi-transparente
+                          color: Colors.white.withOpacity(0.3),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 25,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Actualizar Datos de la Cita',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          const Center(
+                            child: Text(
+                              'Actualizar Datos de la Cita',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 25),
@@ -362,55 +412,73 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
                                 setState(() => doctorId = value),
                           ),
                           const SizedBox(height: 16),
-                          _buildTextField(
-                            initialValue: motivo,
+                          _buildDropdownFields(
+                            value: motivo,
+                            hint: 'Selecciona un Motivo',
                             label: 'Motivo',
                             icon: Icons.note_alt,
-                            onChanged: (value) => motivo = value,
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white.withOpacity(0.15),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: InkWell(
-                              onTap: () async {
-                                final fecha = await showDatePicker(
-                                  context: context,
-                                  initialDate: fechaHora ?? DateTime.now(),
-                                  firstDate: DateTime(2024),
-                                  lastDate: DateTime(2030),
-                                );
-                                if (fecha != null) {
-                                  final hora = await showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.fromDateTime(
-                                      fechaHora ?? DateTime.now(),
+                            items: motivosPredefinidos
+                                .map(
+                                  (m) => DropdownMenuItem(
+                                    value: m,
+                                    child: Text(
+                                      m,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  );
-                                  if (hora != null) {
-                                    setState(() {
-                                      fechaHora = DateTime(
-                                        fecha.year,
-                                        fecha.month,
-                                        fecha.day,
-                                        hora.hour,
-                                        hora.minute,
-                                      );
-                                    });
-                                  }
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => motivo = value),
+                          ),
+
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () async {
+                              final fecha = await showDatePicker(
+                                context: context,
+                                initialDate: fechaHora ?? DateTime.now(),
+                                firstDate: DateTime(2024),
+                                lastDate: DateTime(2030),
+                              );
+                              if (fecha != null) {
+                                final hora = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.fromDateTime(
+                                    fechaHora ?? DateTime.now(),
+                                  ),
+                                );
+                                if (hora != null) {
+                                  setState(() {
+                                    fechaHora = DateTime(
+                                      fecha.year,
+                                      fecha.month,
+                                      fecha.day,
+                                      hora.hour,
+                                      hora.minute,
+                                    );
+                                  });
                                 }
-                              },
+                              }
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
                               child: Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.calendar_today,
                                     color: Colors.tealAccent,
                                   ),
@@ -431,21 +499,27 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
                             ),
                           ),
                           const SizedBox(height: 30),
-                          ElevatedButton.icon(
-                            onPressed: actualizarCita,
-                            icon: const Icon(Icons.save),
-                            label: const Text(
-                              'Actualizar Cita',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16,
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton.icon(
+                              onPressed: actualizarCita,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal.withOpacity(0.85),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                shadowColor: Colors.tealAccent.withOpacity(0.4),
+                                elevation: 10,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              icon: const Icon(Icons.save, color: Colors.white),
+                              label: const Text(
+                                'Actualizar Cita',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),

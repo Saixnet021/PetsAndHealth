@@ -291,6 +291,7 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
                   ),
                 ),
               ),
+
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
