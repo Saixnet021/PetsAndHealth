@@ -187,6 +187,15 @@ class _PacientesScreenState extends State<PacientesScreen> {
                         );
                       }
 
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final crossAxisCount = screenWidth < 600
+                          ? 1
+                          : screenWidth < 900
+                          ? 2
+                          : screenWidth < 1200
+                          ? 3
+                          : 4;
+
                       final pacientesDocs = snapshot.data!.docs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         final nombreMascota =
@@ -213,7 +222,8 @@ class _PacientesScreenState extends State<PacientesScreen> {
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 30,
                           mainAxisSpacing: 30,
-                          childAspectRatio: 1,
+                          childAspectRatio:
+                              0.75, // proporción más vertical para evitar overflow
                         ),
                         itemCount: pacientesDocs.length,
                         itemBuilder: (context, index) {
@@ -256,16 +266,22 @@ class _PacientesScreenState extends State<PacientesScreen> {
     String edad,
   ) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 340, maxHeight: 380),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: Colors.white.withOpacity(0.15),
         border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.all(10),
       child: Column(
-        mainAxisSize:
-            MainAxisSize.min, // Previene expansión vertical innecesaria
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
@@ -274,25 +290,25 @@ class _PacientesScreenState extends State<PacientesScreen> {
                     (pacienteData['fotoUrl'] as String).isNotEmpty
                 ? Image.network(
                     pacienteData['fotoUrl'],
-                    width: 160,
-                    height: 160,
+                    width: 130,
+                    height: 130,
                     fit: BoxFit.cover,
                   )
                 : Container(
-                    width: 160,
-                    height: 160,
+                    width: 130,
+                    height: 130,
                     decoration: BoxDecoration(
                       color: Colors.teal[100],
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: const Icon(Icons.pets, size: 70, color: Colors.teal),
+                    child: const Icon(Icons.pets, size: 60, color: Colors.teal),
                   ),
           ),
           const SizedBox(height: 10),
           Text(
             pacienteData['nombre'] ?? 'Sin nombre',
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -306,7 +322,7 @@ class _PacientesScreenState extends State<PacientesScreen> {
           _infoItem(Icons.pets, 'Raza: ${pacienteData['raza'] ?? ''}'),
           _infoItem(Icons.cake, 'Edad: $edad'),
           _infoItem(Icons.person, 'Dueño: $clienteNombre'),
-          const SizedBox(height: 8),
+          const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -382,17 +398,38 @@ class _PacientesScreenState extends State<PacientesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar paciente'),
+        backgroundColor: Colors.white.withOpacity(0.1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+            SizedBox(width: 8),
+            Text(
+              'Eliminar paciente',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         content: const Text(
           '¿Estás seguro de que deseas eliminar este paciente?',
+          style: TextStyle(color: Colors.white),
         ),
         actions: [
-          TextButton(
+          TextButton.icon(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            icon: const Icon(Icons.cancel, color: Colors.grey),
+            label: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () async {
               await FirebaseFirestore.instance
                   .collection('pacientes')
@@ -400,7 +437,11 @@ class _PacientesScreenState extends State<PacientesScreen> {
                   .delete();
               Navigator.pop(context);
             },
-            child: const Text('Eliminar'),
+            icon: const Icon(Icons.delete_forever, color: Colors.white),
+            label: const Text(
+              'Eliminar',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

@@ -412,16 +412,38 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar Doctor'),
+        backgroundColor: Colors.white.withOpacity(0.1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+            SizedBox(width: 8),
+            Text(
+              'Eliminar Doctor',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         content: const Text(
           '¿Estás seguro de que deseas eliminar este doctor?',
+          style: TextStyle(color: Colors.white),
         ),
         actions: [
-          TextButton(
+          TextButton.icon(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            icon: const Icon(Icons.cancel, color: Colors.grey),
+            label: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
           ),
-          TextButton(
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () async {
               await FirebaseFirestore.instance
                   .collection('doctores')
@@ -429,7 +451,11 @@ class _DoctoresScreenState extends State<DoctoresScreen> {
                   .delete();
               Navigator.pop(context);
             },
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            icon: const Icon(Icons.delete_forever, color: Colors.white),
+            label: const Text(
+              'Eliminar',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

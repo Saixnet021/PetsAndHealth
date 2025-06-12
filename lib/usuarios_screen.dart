@@ -239,28 +239,79 @@ class UsuariosScreen extends StatelessWidget {
                                           final confirm = await showDialog<bool>(
                                             context: context,
                                             builder: (_) => AlertDialog(
-                                              title: const Text(
-                                                'Eliminar usuario',
+                                              backgroundColor: Colors.white
+                                                  .withOpacity(0.1),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              title: Row(
+                                                children: const [
+                                                  Icon(
+                                                    Icons.warning_amber_rounded,
+                                                    color: Colors.redAccent,
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    'Eliminar usuario',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                               content: Text(
                                                 '¿Estás seguro de eliminar a $nombre $apellido?',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                               actions: [
-                                                TextButton(
+                                                TextButton.icon(
                                                   onPressed: () =>
                                                       Navigator.pop(
                                                         context,
                                                         false,
                                                       ),
-                                                  child: const Text('Cancelar'),
+                                                  icon: const Icon(
+                                                    Icons.cancel,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  label: const Text(
+                                                    'Cancelar',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
                                                 ),
-                                                ElevatedButton(
+                                                ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.redAccent,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
+                                                  ),
                                                   onPressed: () =>
                                                       Navigator.pop(
                                                         context,
                                                         true,
                                                       ),
-                                                  child: const Text('Eliminar'),
+                                                  icon: const Icon(
+                                                    Icons.delete_forever,
+                                                    color: Colors.white,
+                                                  ),
+                                                  label: const Text(
+                                                    'Eliminar',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             ),

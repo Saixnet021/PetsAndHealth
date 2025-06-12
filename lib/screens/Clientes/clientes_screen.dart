@@ -318,17 +318,38 @@ class _ClientesScreenState extends State<ClientesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar cliente'),
+        backgroundColor: Colors.white.withOpacity(0.1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+            SizedBox(width: 8),
+            Text(
+              'Eliminar Cliente',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         content: const Text(
           '¿Estás seguro de que deseas eliminar este cliente?',
+          style: TextStyle(color: Colors.white),
         ),
         actions: [
-          TextButton(
+          TextButton.icon(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            icon: const Icon(Icons.cancel, color: Colors.grey),
+            label: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () async {
               await FirebaseFirestore.instance
                   .collection('clientes')
@@ -336,7 +357,11 @@ class _ClientesScreenState extends State<ClientesScreen> {
                   .delete();
               Navigator.pop(context);
             },
-            child: const Text('Eliminar'),
+            icon: const Icon(Icons.delete_forever, color: Colors.white),
+            label: const Text(
+              'Eliminar',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
