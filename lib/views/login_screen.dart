@@ -1,10 +1,11 @@
 // views/login_screen.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../controllers/login_controller.dart';
 import '../models/login_request.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'dart:html' as html;
 import 'package:petsandhealth/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -117,15 +118,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: InkWell(
                   onTap: () async {
-                    final Uri url = Uri.parse(
-                      'https://perfiles-one.vercel.app/',
-                    );
-                    if (await canLaunchUrl(url)) {
-                      await launchUrl(
-                        url,
-                        mode: LaunchMode
-                            .platformDefault, // Más seguro en Flutter Web
-                      );
+                    const url = 'https://perfiles-one.vercel.app/';
+
+                    if (kIsWeb) {
+                      // Redirección específica para Flutter Web
+                      html.window.open(url, '_blank');
+                    } else {
+                      // Redirección para móviles o escritorio
+                      final Uri uri = Uri.parse(url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
                     }
                   },
                   child: const Text(
