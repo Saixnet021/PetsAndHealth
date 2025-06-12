@@ -87,7 +87,6 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
         filename: 'imagen.jpg',
       ),
     );
-
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
 
@@ -113,7 +112,6 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
     }
 
     String? nuevaUrl = fotoUrlExistente;
-
     if (imagenSeleccionada != null) {
       nuevaUrl = await subirImagenAPostImages(imagenSeleccionada!);
     }
@@ -135,136 +133,250 @@ class _EditarPacienteScreenState extends State<EditarPacienteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final formWidth = screenWidth > 600 ? 500.0 : double.infinity;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FF),
-      appBar: AppBar(
-        title: const Text('Editar Paciente'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            // Imagen
-            GestureDetector(
-              onTap: seleccionarImagen,
-              child: imagenSeleccionada != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.memory(
-                        imagenSeleccionada!,
-                        height: 200,
-                        fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          Column(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
                       ),
-                    )
-                  : fotoUrlExistente != null && fotoUrlExistente!.isNotEmpty
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        fotoUrlExistente!,
-                        height: 200,
-                        fit: BoxFit.cover,
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Editar Paciente',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    )
-                  : Container(
-                      height: 200,
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Container(
+                      width: formWidth,
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.1),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.25),
+                            blurRadius: 20,
+                            spreadRadius: 1,
+                          ),
+                        ],
                       ),
-                      child: const Center(
-                        child: Text('Toca para seleccionar imagen'),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: seleccionarImagen,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: imagenSeleccionada != null
+                                  ? Image.memory(
+                                      imagenSeleccionada!,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : (fotoUrlExistente != null &&
+                                        fotoUrlExistente!.isNotEmpty)
+                                  ? Image.network(
+                                      fotoUrlExistente!,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      height: 200,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.05),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.2),
+                                        ),
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          'Toca para seleccionar imagen',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          DropdownButtonFormField<String>(
+                            value: clienteId,
+                            dropdownColor: Colors.grey[900],
+                            style: const TextStyle(color: Colors.white),
+                            decoration: _decoracionInput('Cliente'),
+                            items: clientes.map((cliente) {
+                              return DropdownMenuItem(
+                                value: cliente.id,
+                                child: Text(
+                                  cliente['nombre'] ?? 'Nombre no disponible',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) =>
+                                setState(() => clienteId = value),
+                          ),
+                          const SizedBox(height: 16),
+                          _campoTexto('Nombre', nombre, (v) => nombre = v),
+                          const SizedBox(height: 16),
+                          _campoTexto('Especie', especie, (v) => especie = v),
+                          const SizedBox(height: 16),
+                          _campoTexto('Raza', raza, (v) => raza = v),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              final fecha = await showDatePicker(
+                                context: context,
+                                initialDate: fechaNacimiento ?? DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (fecha != null)
+                                setState(() => fechaNacimiento = fecha);
+                            },
+                            icon: const Icon(
+                              Icons.calendar_today,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              fechaNacimiento == null
+                                  ? 'Seleccionar Fecha de Nacimiento'
+                                  : '${fechaNacimiento!.toLocal()}'.split(
+                                      ' ',
+                                    )[0],
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 20,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          GestureDetector(
+                            onTap: actualizarPaciente,
+                            child: Container(
+                              width: double.infinity,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: const LinearGradient(
+                                  colors: [Colors.tealAccent, Colors.teal],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.tealAccent.withOpacity(0.3),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.save, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Actualizar Paciente',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-            ),
-            const SizedBox(height: 16),
-
-            DropdownButtonFormField<String>(
-              value: clienteId,
-              decoration: const InputDecoration(labelText: 'Cliente'),
-              items: clientes.map((cliente) {
-                return DropdownMenuItem(
-                  value: cliente.id,
-                  child: Text(cliente['nombre']),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => clienteId = value),
-            ),
-            const SizedBox(height: 10),
-
-            TextFormField(
-              initialValue: nombre,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-              onChanged: (value) => nombre = value,
-            ),
-            const SizedBox(height: 10),
-
-            TextFormField(
-              initialValue: especie,
-              decoration: const InputDecoration(labelText: 'Especie'),
-              onChanged: (value) => especie = value,
-            ),
-            const SizedBox(height: 10),
-
-            TextFormField(
-              initialValue: raza,
-              decoration: const InputDecoration(labelText: 'Raza'),
-              onChanged: (value) => raza = value,
-            ),
-            const SizedBox(height: 10),
-
-            ElevatedButton.icon(
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: fechaNacimiento ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) {
-                  setState(() {
-                    fechaNacimiento = picked;
-                  });
-                }
-              },
-              icon: const Icon(Icons.calendar_today),
-              label: Text(
-                fechaNacimiento == null
-                    ? 'Seleccionar Fecha de Nacimiento'
-                    : '${fechaNacimiento!.toLocal()}'.split(' ')[0],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 20,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            ElevatedButton.icon(
-              onPressed: actualizarPaciente,
-              icon: const Icon(Icons.save),
-              label: const Text('Actualizar Paciente'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 20,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  InputDecoration _decoracionInput(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.1),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Colors.tealAccent, width: 2),
+      ),
+    );
+  }
+
+  Widget _campoTexto(String label, String inicial, Function(String) onChanged) {
+    return TextFormField(
+      initialValue: inicial,
+      onChanged: onChanged,
+      style: const TextStyle(color: Colors.white),
+      decoration: _decoracionInput(label),
     );
   }
 }

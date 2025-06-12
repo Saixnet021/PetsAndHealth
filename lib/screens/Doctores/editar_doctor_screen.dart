@@ -12,7 +12,7 @@ class EditarDoctorScreen extends StatefulWidget {
   });
 
   @override
-  _EditarDoctorScreenState createState() => _EditarDoctorScreenState();
+  State<EditarDoctorScreen> createState() => _EditarDoctorScreenState();
 }
 
 class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
@@ -70,12 +70,11 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
               'correo': _correoController.text.trim(),
               'telefono': _telefonoController.text.trim(),
             });
-
         Navigator.pop(context);
       } catch (e) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (_) => AlertDialog(
             title: const Text('Error'),
             content: Text('Hubo un problema al actualizar el doctor: $e'),
             actions: [
@@ -100,32 +99,22 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.tealAccent),
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.15), // Efecto glassmorphism
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
+        fillColor: Colors.white.withOpacity(0.12),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.tealAccent, width: 2),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
         ),
       ),
-      style: const TextStyle(color: Colors.white),
       validator: validator,
     );
   }
@@ -133,41 +122,25 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
       value: _especialidadSeleccionada,
+      dropdownColor: Colors.grey[850],
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.medical_services, color: Colors.tealAccent),
         labelText: 'Especialidad',
         labelStyle: const TextStyle(color: Colors.white),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.15), // Efecto glassmorphism
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
+        fillColor: Colors.white.withOpacity(0.12),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.tealAccent, width: 2),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
         ),
       ),
-      style: const TextStyle(color: Colors.white),
-      dropdownColor: Colors.grey[800],
       items: especialidades.map((especialidad) {
-        return DropdownMenuItem<String>(
-          value: especialidad,
-          child: Text(
-            especialidad,
-            style: const TextStyle(color: Colors.white),
-          ),
-        );
+        return DropdownMenuItem(value: especialidad, child: Text(especialidad));
       }).toList(),
       onChanged: (value) {
         setState(() {
@@ -188,87 +161,79 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
+          // Fondo
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
-          // Main Content
+
+          // Contenido
           Column(
             children: [
-              // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Editar Doctor',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+              // AppBar personalizado
+              SafeArea(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Editar Doctor',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.local_hospital_outlined,
                         color: Colors.white,
                       ),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.local_hospital, color: Colors.white),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              // Content
+
+              // Formulario
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Container(
                       width: formWidth,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 30,
-                      ),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: Colors.white.withOpacity(
-                          0.15,
-                        ), // Efecto glassmorphism
+                        color: Colors.white.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.white.withOpacity(
-                            0.3,
-                          ), // Borde semi-transparente
-                          width: 1,
+                          color: Colors.white.withOpacity(0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 16,
+                            spreadRadius: 4,
                           ),
                         ],
                       ),
@@ -279,22 +244,20 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
                             const Text(
                               'Actualizar Datos del Doctor',
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 25),
+                            const SizedBox(height: 20),
                             _buildTextField(
                               controller: _nombreController,
                               label: 'Nombre',
                               icon: Icons.person,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un nombre';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un nombre'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             _buildDropdownField(),
@@ -306,7 +269,7 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
                               keyboardType: TextInputType.emailAddress,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un correo';
+                                  return 'Ingrese un correo';
                                 }
                                 if (!RegExp(
                                   r"^[^@]+@[^@]+\.[^@]+",
@@ -322,29 +285,30 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
                               label: 'Teléfono',
                               icon: Icons.phone,
                               keyboardType: TextInputType.phone,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un teléfono';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un teléfono'
+                                  : null,
                             ),
                             const SizedBox(height: 30),
-                            ElevatedButton.icon(
+                            FilledButton.icon(
                               onPressed: _actualizarDoctor,
-                              icon: const Icon(Icons.save),
+                              icon: const Icon(Icons.save, color: Colors.white),
                               label: const Text(
                                 'Guardar Cambios',
-                                style: TextStyle(fontSize: 16),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
                               ),
-                              style: ElevatedButton.styleFrom(
+                              style: FilledButton.styleFrom(
                                 backgroundColor: Colors.teal,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
+                                  horizontal: 28,
                                   vertical: 16,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                             ),
@@ -362,4 +326,3 @@ class _EditarDoctorScreenState extends State<EditarDoctorScreen> {
     );
   }
 }
-//✅

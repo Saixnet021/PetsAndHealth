@@ -11,23 +11,9 @@ class AgregarDoctorScreen extends StatefulWidget {
 class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _especialidadController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
-
-  String? _especialidadSeleccionada;
-
-  final List<String> especialidades = [
-    'Veterinario General',
-    'Cirujano Veterinario',
-    'Dermatólogo Veterinario',
-    'Cardiólogo Veterinario',
-    'Oftalmólogo Veterinario',
-    'Oncólogo Veterinario',
-    'Especialista en Animales Exóticos',
-    'Etólogo (Conductista Animal)',
-    'Odontólogo Veterinario',
-    'Zootecnista (Nutrición y Producción Animal)',
-  ];
 
   void _mostrarError(String mensaje) {
     showDialog(
@@ -50,14 +36,14 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
       try {
         await FirebaseFirestore.instance.collection('doctores').add({
           'nombre': _nombreController.text.trim(),
-          'especialidad': _especialidadSeleccionada,
+          'especialidad': _especialidadController.text.trim(),
           'correo': _correoController.text.trim(),
           'telefono': _telefonoController.text.trim(),
         });
 
         Navigator.pop(context);
       } catch (e) {
-        _mostrarError('Hubo un problema al agregar el doctor: $e');
+        _mostrarError('Hubo un error al guardar el doctor: $e');
       }
     }
   }
@@ -65,6 +51,7 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
   @override
   void dispose() {
     _nombreController.dispose();
+    _especialidadController.dispose();
     _correoController.dispose();
     _telefonoController.dispose();
     super.dispose();
@@ -76,19 +63,16 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
     IconData? icon,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
-    int? maxLength,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      maxLength: maxLength,
       decoration: InputDecoration(
         prefixIcon: icon != null ? Icon(icon, color: Colors.tealAccent) : null,
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.15), // Efecto glassmorphism
-        counterText: '',
+        fillColor: Colors.white.withOpacity(0.15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
@@ -113,64 +97,47 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
     );
   }
 
-  Widget _buildDropdownField() {
+  Widget _buildGuardarDoctorButton() {
     return Container(
+      width: double.infinity,
+      height: 60,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white.withOpacity(0.15),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Colors.tealAccent, Colors.teal],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.tealAccent.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: DropdownButtonFormField<String>(
-        value: _especialidadSeleccionada,
-        hint: const Text(
-          'Selecciona una especialidad',
-          style: TextStyle(color: Colors.white70),
+      child: ElevatedButton(
+        onPressed: _guardarDoctor,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
-        items: especialidades.map((especialidad) {
-          return DropdownMenuItem(
-            value: especialidad,
-            child: Text(
-              especialidad,
-              style: const TextStyle(color: Colors.white),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save, color: Colors.white),
+            SizedBox(width: 12),
+            Text(
+              'Guardar Doctor',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            _especialidadSeleccionada = value;
-          });
-        },
-        decoration: InputDecoration(
-          prefixIcon: const Icon(
-            Icons.medical_services,
-            color: Colors.tealAccent,
-          ),
-          labelText: 'Especialidad',
-          labelStyle: const TextStyle(color: Colors.white),
-          filled: false,
-          counterText: '',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.tealAccent, width: 2),
-          ),
+          ],
         ),
-        style: const TextStyle(color: Colors.white),
-        dropdownColor: Colors.teal.shade800,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor seleccione una especialidad';
-          }
-          return null;
-        },
-        isExpanded: true,
       ),
     );
   }
@@ -183,98 +150,71 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
-          // Main Content
+
           Column(
             children: [
-              // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Agregar Doctor',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.white),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'opcion1',
-                          child: Text('Opción 1'),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Agregar Doctor',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const PopupMenuItem(
-                          value: 'opcion2',
-                          child: Text('Opción 2'),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        // Aquí puedes manejar las opciones
-                      },
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              // Content
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 30,
+                      horizontal: 24,
+                      vertical: 20,
                     ),
                     child: Container(
                       width: formWidth,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.1),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
-                          width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.25),
                             blurRadius: 20,
-                            spreadRadius: 5,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
@@ -285,35 +225,40 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
                             const Text(
                               'Registrar Nuevo Doctor',
                               style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
                                 color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 25),
                             _buildTextField(
                               controller: _nombreController,
-                              label: 'Nombre Completo',
+                              label: 'Nombre',
                               icon: Icons.person,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un nombre';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un nombre'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
-                            _buildDropdownField(),
+                            _buildTextField(
+                              controller: _especialidadController,
+                              label: 'Especialidad',
+                              icon: Icons.medical_services,
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese una especialidad'
+                                  : null,
+                            ),
                             const SizedBox(height: 16),
                             _buildTextField(
                               controller: _correoController,
-                              label: 'Correo Electrónico',
+                              label: 'Correo',
                               icon: Icons.email,
                               keyboardType: TextInputType.emailAddress,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un correo';
-                                }
+                                if (value == null || value.isEmpty)
+                                  return 'Ingrese un correo';
                                 if (!RegExp(
                                   r'^[^@]+@[^@]+\.[^@]+',
                                 ).hasMatch(value)) {
@@ -328,41 +273,13 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
                               label: 'Teléfono',
                               icon: Icons.phone,
                               keyboardType: TextInputType.phone,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un número de teléfono';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un teléfono'
+                                  : null,
                             ),
                             const SizedBox(height: 30),
-                            Center(
-                              child: ElevatedButton.icon(
-                                onPressed: _guardarDoctor,
-                                icon: const Icon(
-                                  Icons.save,
-                                  color: Colors.white,
-                                ),
-                                label: const Text(
-                                  'Guardar Doctor',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 30,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  minimumSize: const Size(160, 45),
-                                ),
-                              ),
-                            ),
+                            _buildGuardarDoctorButton(),
                           ],
                         ),
                       ),
@@ -377,4 +294,3 @@ class _AgregarDoctorScreenState extends State<AgregarDoctorScreen> {
     );
   }
 }
-//✅

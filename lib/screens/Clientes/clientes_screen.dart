@@ -35,396 +35,282 @@ class _ClientesScreenState extends State<ClientesScreen> {
     final isWide = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Background Image
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
-          // Main Content
-          Column(
-            children: [
-              // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Clientes',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+
+          SafeArea(
+            child: Column(
+              children: [
+                // AppBar estilo iOS
+                // AppBar estilo iOS con botón Agregar
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Clientes',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.people_alt, color: Colors.white),
-                  ],
-                ),
-              ),
-
-              // Content
-              Expanded(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Buscar por nombre o DNI...',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.teal,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 14,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('clientes')
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Center(
-                              child: Text('Error: ${snapshot.error}'),
-                            );
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                              child: Text(
-                                'No hay clientes registrados',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            );
-                          }
-
-                          final clientesDocs = snapshot.data!.docs.where((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final nombre = data['nombre']?.toLowerCase() ?? '';
-                            final dni = data['dni']?.toLowerCase() ?? '';
-                            return nombre.contains(_searchText) ||
-                                dni.contains(_searchText);
-                          }).toList();
-
-                          if (clientesDocs.isEmpty) {
-                            return const Center(
-                              child: Text(
-                                'No se encontraron resultados',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            );
-                          }
-
-                          return ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            itemCount: clientesDocs.length,
-                            itemBuilder: (context, index) {
-                              final clienteDoc = clientesDocs[index];
-                              final clienteData =
-                                  clienteDoc.data() as Map<String, dynamic>;
-
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  color: Colors.white.withOpacity(
-                                    0.15,
-                                  ), // Efecto glassmorphism
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(
-                                      0.3,
-                                    ), // Borde semi-transparente
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: isWide
-                                    ? Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          CircleAvatar(
-                                            radius: 35,
-                                            backgroundColor: Colors.teal[100],
-                                            child: Text(
-                                              clienteData['nombre']?[0]
-                                                      ?.toUpperCase() ??
-                                                  '',
-                                              style: const TextStyle(
-                                                fontSize: 24,
-                                                color: Colors.teal,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  clienteData['nombre'] ??
-                                                      'Sin nombre',
-                                                  style: const TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors
-                                                        .white, // Texto blanco para contraste
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 10),
-                                                Wrap(
-                                                  spacing: 30,
-                                                  runSpacing: 8,
-                                                  children: [
-                                                    _infoItem(
-                                                      Icons.badge,
-                                                      'DNI: ${clienteData['dni'] ?? ''}',
-                                                    ),
-                                                    _infoItem(
-                                                      Icons.email,
-                                                      'Correo: ${clienteData['correo'] ?? ''}',
-                                                    ),
-                                                    _infoItem(
-                                                      Icons.phone,
-                                                      'Tel: ${clienteData['telefono'] ?? ''}',
-                                                    ),
-                                                    _infoItem(
-                                                      Icons.location_on,
-                                                      'Dir: ${clienteData['direccion'] ?? ''}',
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.edit,
-                                                  color: Colors.orange,
-                                                ),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          EditarClienteScreen(
-                                                            clienteId:
-                                                                clienteDoc.id,
-                                                            clienteData:
-                                                                clienteData,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.delete,
-                                                  color: Colors.red,
-                                                ),
-                                                onPressed: () {
-                                                  _confirmarEliminacion(
-                                                    context,
-                                                    clienteDoc.id,
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      )
-                                    : Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 30,
-                                                backgroundColor:
-                                                    Colors.teal[100],
-                                                child: Text(
-                                                  clienteData['nombre']?[0]
-                                                          ?.toUpperCase() ??
-                                                      '',
-                                                  style: const TextStyle(
-                                                    fontSize: 24,
-                                                    color: Colors.teal,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Text(
-                                                  clienteData['nombre'] ??
-                                                      'Sin nombre',
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors
-                                                        .white, // Texto blanco para contraste
-                                                  ),
-                                                ),
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.edit,
-                                                  color: Colors.orange,
-                                                ),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          EditarClienteScreen(
-                                                            clienteId:
-                                                                clienteDoc.id,
-                                                            clienteData:
-                                                                clienteData,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.delete,
-                                                  color: Colors.red,
-                                                ),
-                                                onPressed: () {
-                                                  _confirmarEliminacion(
-                                                    context,
-                                                    clienteDoc.id,
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 12),
-                                          _infoItem(
-                                            Icons.badge,
-                                            'DNI: ${clienteData['dni'] ?? ''}',
-                                          ),
-                                          _infoItem(
-                                            Icons.email,
-                                            'Correo: ${clienteData['correo'] ?? ''}',
-                                          ),
-                                          _infoItem(
-                                            Icons.phone,
-                                            'Teléfono: ${clienteData['telefono'] ?? ''}',
-                                          ),
-                                          _infoItem(
-                                            Icons.location_on,
-                                            'Dirección: ${clienteData['direccion'] ?? ''}',
-                                          ),
-                                        ],
-                                      ),
-                              );
-                            },
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AgregarClienteScreen(),
+                            ),
                           );
                         },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.tealAccent,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Colors.tealAccent),
+                          ),
+                        ),
+                        icon: const Icon(Icons.person_add_alt_1_rounded),
+                        label: const Text("Crear"),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Buscador
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por nombre o DNI...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Colors.tealAccent,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+
+                // Lista de clientes
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('clientes')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.tealAccent,
+                          ),
+                        );
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay clientes registrados',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }
+
+                      final clientesDocs = snapshot.data!.docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final nombre = data['nombre']?.toLowerCase() ?? '';
+                        final dni = data['dni']?.toLowerCase() ?? '';
+                        return nombre.contains(_searchText) ||
+                            dni.contains(_searchText);
+                      }).toList();
+
+                      if (clientesDocs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No se encontraron resultados',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: clientesDocs.length,
+                        itemBuilder: (context, index) {
+                          final doc = clientesDocs[index];
+                          final cliente = doc.data() as Map<String, dynamic>;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.tealAccent.withOpacity(
+                                  0.2,
+                                ),
+                                child: Text(
+                                  cliente['nombre']
+                                          ?.substring(0, 1)
+                                          .toUpperCase() ??
+                                      '',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.tealAccent,
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                cliente['nombre'] ?? 'Sin nombre',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  _infoItem(
+                                    Icons.badge,
+                                    'DNI: ${cliente['dni'] ?? ''}',
+                                  ),
+                                  _infoItem(
+                                    Icons.phone,
+                                    'Teléfono: ${cliente['telefono'] ?? ''}',
+                                  ),
+                                  _infoItem(
+                                    Icons.email,
+                                    'Correo: ${cliente['correo'] ?? ''}',
+                                  ),
+                                  _infoItem(
+                                    Icons.location_on,
+                                    'Dirección: ${cliente['direccion'] ?? ''}',
+                                  ),
+                                ],
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.orangeAccent,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => EditarClienteScreen(
+                                            clienteId: doc.id,
+                                            clienteData: cliente,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_forever,
+                                      color: Colors.redAccent,
+                                    ),
+                                    onPressed: () =>
+                                        _confirmarEliminacion(context, doc.id),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.teal,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AgregarClienteScreen(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Agregar Cliente"),
       ),
     );
   }
 
   Widget _infoItem(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: Colors.tealAccent,
-          size: 20,
-        ), // Cambié el color para mejor contraste
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 15,
-            color: Colors.white,
-          ), // Texto blanco
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.tealAccent, size: 16),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -441,7 +327,8 @@ class _ClientesScreenState extends State<ClientesScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
               await FirebaseFirestore.instance
                   .collection('clientes')
@@ -449,11 +336,10 @@ class _ClientesScreenState extends State<ClientesScreen> {
                   .delete();
               Navigator.pop(context);
             },
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            child: const Text('Eliminar'),
           ),
         ],
       ),
     );
   }
 }
-//✅

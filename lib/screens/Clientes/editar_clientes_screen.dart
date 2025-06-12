@@ -126,87 +126,85 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
+          // Fondo con imagen
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
               ),
             ),
           ),
-          // Dark Overlay
+          // Capa oscura con degradado
           Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black54, Colors.black87],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
           ),
-          // Main Content
+          // Contenido principal
           Column(
             children: [
-              // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Editar Cliente',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              // AppBar personalizado
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.edit, color: Colors.white),
-                  ],
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Editar Cliente',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.edit, color: Colors.white),
+                    ],
+                  ),
                 ),
               ),
-              // Content
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
                     child: Container(
                       width: formWidth,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 30,
-                      ),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: Colors.white.withOpacity(
-                          0.15,
-                        ), // Efecto glassmorphism
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.1),
                         border: Border.all(
-                          color: Colors.white.withOpacity(
-                            0.3,
-                          ), // Borde semi-transparente
-                          width: 1,
+                          color: Colors.white.withOpacity(0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.25),
                             blurRadius: 20,
-                            spreadRadius: 5,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
@@ -217,9 +215,9 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                             const Text(
                               'Actualizar Datos del Cliente',
                               style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
                                 color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 25),
@@ -227,12 +225,10 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                               controller: _nombreController,
                               label: 'Nombre',
                               icon: Icons.person,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un nombre';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un nombre'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
@@ -240,9 +236,8 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                               label: 'Correo',
                               icon: Icons.email,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un correo';
-                                }
+                                if (value == null || value.isEmpty)
+                                  return 'Ingrese un correo';
                                 if (!RegExp(
                                   r'^[^@]+@[^@]+\.[^@]+',
                                 ).hasMatch(value)) {
@@ -256,24 +251,20 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                               controller: _telefonoController,
                               label: 'Teléfono',
                               icon: Icons.phone,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un teléfono';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un teléfono'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
                               controller: _direccionController,
                               label: 'Dirección',
                               icon: Icons.location_on,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese una dirección';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese una dirección'
+                                  : null,
                             ),
                             const SizedBox(height: 30),
                             ElevatedButton.icon(
@@ -285,13 +276,15 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.teal,
+                                foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
                                   vertical: 16,
+                                  horizontal: 30,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
+                                textStyle: const TextStyle(fontSize: 16),
                               ),
                             ),
                           ],

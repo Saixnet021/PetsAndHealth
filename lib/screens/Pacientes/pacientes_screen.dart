@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import 'agregar_paciente_screen.dart';
-import 'editar_paciente_screen.dart';
+import 'package:petsandhealth/screens/Pacientes/agregar_paciente_screen.dart';
+import 'package:petsandhealth/screens/Pacientes/editar_paciente_screen.dart';
 
 class PacientesScreen extends StatefulWidget {
   const PacientesScreen({super.key});
@@ -12,6 +11,7 @@ class PacientesScreen extends StatefulWidget {
 }
 
 class _PacientesScreenState extends State<PacientesScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
   Map<String, String> clienteNombres = {};
 
@@ -19,6 +19,12 @@ class _PacientesScreenState extends State<PacientesScreen> {
   void initState() {
     super.initState();
     _cargarClientes();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _cargarClientes() async {
@@ -48,176 +54,197 @@ class _PacientesScreenState extends State<PacientesScreen> {
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
+          // Fondo degradado
           Container(
             decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
-          Column(
-            children: [
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Pacientes',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+
+          SafeArea(
+            child: Column(
+              children: [
+                // AppBar tipo iOS
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Pacientes',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.pets, color: Colors.white),
-                  ],
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AgregarPacienteScreen(),
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.tealAccent,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Colors.tealAccent),
+                          ),
+                        ),
+                        icon: const Icon(Icons.pets),
+                        label: const Text("Crear"),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Buscar por nombre de mascota o dueño...',
-                    prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
+
+                // Buscador
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por nombre, especie o raza...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Colors.tealAccent,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value.toLowerCase();
-                    });
-                  },
                 ),
-              ),
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('pacientes')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          'Error: ${snapshot.error}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      );
-                    } else if (!snapshot.hasData ||
-                        snapshot.data!.docs.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No hay pacientes registrados',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      );
-                    }
 
-                    final pacientesDocs = snapshot.data!.docs.where((doc) {
-                      final data = doc.data() as Map<String, dynamic>;
-                      final nombreMascota =
-                          data['nombre']?.toString().toLowerCase() ?? '';
-                      final clienteId = data['clienteId'];
-                      final nombreCliente =
-                          clienteNombres[clienteId]?.toLowerCase() ?? '';
-                      return nombreMascota.contains(searchQuery) ||
-                          nombreCliente.contains(searchQuery);
-                    }).toList();
-
-                    if (pacientesDocs.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No se encontraron pacientes',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      );
-                    }
-
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 0.65,
-                      ),
-                      itemCount: pacientesDocs.length,
-                      itemBuilder: (context, index) {
-                        final pacienteDoc = pacientesDocs[index];
-                        final pacienteData =
-                            pacienteDoc.data() as Map<String, dynamic>;
-                        final clienteNombre =
-                            clienteNombres[pacienteData['clienteId']] ??
-                            'Desconocido';
-                        final fechaNacimiento =
-                            pacienteData['fechaNacimiento'] is Timestamp
-                            ? (pacienteData['fechaNacimiento'] as Timestamp)
-                                  .toDate()
-                            : DateTime.now();
-                        final edad = calcularEdad(fechaNacimiento);
-
-                        return _buildPacienteCard(
-                          pacienteDoc,
-                          pacienteData,
-                          clienteNombre,
-                          edad,
+                // Lista de pacientes
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('pacientes')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
                         );
-                      },
-                    );
-                  },
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        );
+                      } else if (!snapshot.hasData ||
+                          snapshot.data!.docs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay pacientes registrados',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                        );
+                      }
+
+                      final pacientesDocs = snapshot.data!.docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final nombreMascota =
+                            data['nombre']?.toString().toLowerCase() ?? '';
+                        final clienteId = data['clienteId'];
+                        final nombreCliente =
+                            clienteNombres[clienteId]?.toLowerCase() ?? '';
+                        return nombreMascota.contains(searchQuery) ||
+                            nombreCliente.contains(searchQuery);
+                      }).toList();
+
+                      if (pacientesDocs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No se encontraron pacientes',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                        );
+                      }
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(12),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 30,
+                          mainAxisSpacing: 30,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: pacientesDocs.length,
+                        itemBuilder: (context, index) {
+                          final pacienteDoc = pacientesDocs[index];
+                          final pacienteData =
+                              pacienteDoc.data() as Map<String, dynamic>;
+                          final clienteNombre =
+                              clienteNombres[pacienteData['clienteId']] ??
+                              'Desconocido';
+                          final fechaNacimiento =
+                              pacienteData['fechaNacimiento'] is Timestamp
+                              ? (pacienteData['fechaNacimiento'] as Timestamp)
+                                    .toDate()
+                              : DateTime.now();
+                          final edad = calcularEdad(fechaNacimiento);
+
+                          return _buildPacienteCard(
+                            pacienteDoc,
+                            pacienteData,
+                            clienteNombre,
+                            edad,
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.teal,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AgregarPacienteScreen(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Agregar Paciente"),
       ),
     );
   }
@@ -236,7 +263,8 @@ class _PacientesScreenState extends State<PacientesScreen> {
       ),
       padding: const EdgeInsets.all(10),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Clave para evitar expansión vertical
+        mainAxisSize:
+            MainAxisSize.min, // Previene expansión vertical innecesaria
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClipRRect(
@@ -309,6 +337,26 @@ class _PacientesScreenState extends State<PacientesScreen> {
     );
   }
 
+  String calcularEdad(DateTime fechaNacimiento) {
+    final ahora = DateTime.now();
+    int edad = ahora.year - fechaNacimiento.year;
+    int mes = ahora.month - fechaNacimiento.month;
+    int dia = ahora.day - fechaNacimiento.day;
+
+    if (mes < 0 || (mes == 0 && dia < 0)) {
+      edad--;
+      mes += 12;
+    }
+
+    if (dia < 0) {
+      final ultimoDiaDelMes = DateTime(ahora.year, ahora.month, 0).day;
+      dia += ultimoDiaDelMes;
+      mes--;
+    }
+
+    return '$edad años, $mes meses, $dia días';
+  }
+
   Widget _infoItem(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -330,26 +378,6 @@ class _PacientesScreenState extends State<PacientesScreen> {
     );
   }
 
-  String calcularEdad(DateTime fechaNacimiento) {
-    final ahora = DateTime.now();
-    int edad = ahora.year - fechaNacimiento.year;
-    int mes = ahora.month - fechaNacimiento.month;
-    int dia = ahora.day - fechaNacimiento.day;
-
-    if (mes < 0 || (mes == 0 && dia < 0)) {
-      edad--;
-      mes += 12;
-    }
-
-    if (dia < 0) {
-      final ultimoDiaDelMes = DateTime(ahora.year, ahora.month, 0).day;
-      dia += ultimoDiaDelMes;
-      mes--;
-    }
-
-    return '$edad años, $mes meses, $dia días';
-  }
-
   void _confirmarEliminacion(BuildContext context, String pacienteId) {
     showDialog(
       context: context,
@@ -363,7 +391,8 @@ class _PacientesScreenState extends State<PacientesScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
               await FirebaseFirestore.instance
                   .collection('pacientes')
@@ -371,7 +400,7 @@ class _PacientesScreenState extends State<PacientesScreen> {
                   .delete();
               Navigator.pop(context);
             },
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            child: const Text('Eliminar'),
           ),
         ],
       ),

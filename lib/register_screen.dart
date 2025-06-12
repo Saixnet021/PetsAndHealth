@@ -297,7 +297,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 Icon(Icons.person_add, color: Colors.white),
                                 SizedBox(width: 12),
                                 Text(
-                                  'Registrarse',
+                                  'Registrar',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
@@ -321,17 +321,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "¿Ya tienes cuenta? ",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 16,
-                    ),
-                  ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Text(
-                      "Inicia Sesión",
+                      "Atrás",
                       style: TextStyle(
                         color: _isHoveringLogin
                             ? Colors.tealAccent.shade100

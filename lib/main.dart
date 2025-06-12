@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_screen.dart';
+import 'views/login_screen.dart';
 import 'home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -30,8 +30,10 @@ class MyApp extends StatelessWidget {
       final uid = user.uid;
 
       // Obtiene el rol del usuario desde Firestore
-      final DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
       return userDoc['role']; // Retorna el rol (ejemplo: 'administrador', 'veterinario')
     }
     return null;
@@ -42,10 +44,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Veterinaria Pets & Health',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute:
-          FirebaseAuth.instance.currentUser != null
-              ? '/home'
-              : '/login', // Verifica si el usuario ya está autenticado
+      initialRoute: FirebaseAuth.instance.currentUser != null
+          ? '/home'
+          : '/login', // Verifica si el usuario ya está autenticado
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) {

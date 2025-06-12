@@ -144,6 +144,100 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
     );
   }
 
+  Widget _buildGuardarClienteButton() {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Colors.tealAccent, Colors.teal],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.tealAccent.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _guardarCliente,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save, color: Colors.white),
+            SizedBox(width: 12),
+            Text(
+              'Guardar Cliente',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBuscarDniButton() {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Colors.tealAccent, Colors.teal],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.tealAccent.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ElevatedButton.icon(
+        onPressed: _cargando ? null : _buscarPorDNI,
+        icon: _cargando
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Icon(Icons.search, color: Colors.white),
+        label: const Text(
+          'Buscar DNI',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Dentro
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -152,102 +246,72 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo-huellas.webp'),
-                fit: BoxFit.cover,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F2027),
+                  Color(0xFF203A43),
+                  Color(0xFF2C5364),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
-          // Main Content
+
           Column(
             children: [
-              // AppBar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Agregar Cliente',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              // AppBar personalizado
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.white),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'opcion1',
-                          child: Text('Opción 1'),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Agregar Cliente',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const PopupMenuItem(
-                          value: 'opcion2',
-                          child: Text('Opción 2'),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        // Aquí puedes manejar las opciones
-                      },
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              // Content
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 30,
+                      horizontal: 24,
+                      vertical: 20,
                     ),
                     child: Container(
                       width: formWidth,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: Colors.white.withOpacity(
-                          0.15,
-                        ), // Efecto glassmorphism
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.1),
                         border: Border.all(
-                          color: Colors.white.withOpacity(
-                            0.3,
-                          ), // Borde semi-transparente
-                          width: 1,
+                          color: Colors.white.withOpacity(0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.25),
                             blurRadius: 20,
-                            spreadRadius: 5,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
@@ -258,9 +322,9 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
                             const Text(
                               'Registrar Nuevo Cliente',
                               style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
                                 color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 25),
@@ -271,54 +335,25 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
                               keyboardType: TextInputType.number,
                               maxLength: 8,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
+                                if (value == null || value.isEmpty)
                                   return 'Ingrese el DNI';
-                                }
-                                if (value.length != 8) {
+                                if (value.length != 8)
                                   return 'El DNI debe tener 8 dígitos';
-                                }
                                 return null;
                               },
                             ),
                             const SizedBox(height: 12),
-                            Center(
-                              child: ElevatedButton.icon(
-                                onPressed: _cargando ? null : _buscarPorDNI,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                    horizontal: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  minimumSize: const Size(140, 40),
-                                ),
-                                icon: _cargando
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Icon(Icons.search),
-                                label: const Text('Buscar DNI'),
-                              ),
-                            ),
+                            _buildBuscarDniButton(),
+
                             const SizedBox(height: 20),
                             _buildTextField(
                               controller: _nombreController,
                               label: 'Nombre',
                               icon: Icons.person,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un nombre';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un nombre'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
@@ -327,9 +362,8 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
                               icon: Icons.email,
                               keyboardType: TextInputType.emailAddress,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un correo';
-                                }
+                                if (value == null || value.isEmpty)
+                                  return 'Ingrese un correo';
                                 if (!RegExp(
                                   r'^[^@]+@[^@]+\.[^@]+',
                                 ).hasMatch(value)) {
@@ -344,46 +378,23 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
                               label: 'Teléfono',
                               icon: Icons.phone,
                               keyboardType: TextInputType.phone,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese un número de teléfono';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese un número de teléfono'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
                               controller: _direccionController,
                               label: 'Dirección',
                               icon: Icons.location_on,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingrese una dirección';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Ingrese una dirección'
+                                  : null,
                             ),
                             const SizedBox(height: 30),
-                            Center(
-                              child: ElevatedButton(
-                                onPressed: _guardarCliente,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 30,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  minimumSize: const Size(160, 45),
-                                ),
-                                child: const Text(
-                                  'Guardar Cliente',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
+                            _buildGuardarClienteButton(),
                           ],
                         ),
                       ),
