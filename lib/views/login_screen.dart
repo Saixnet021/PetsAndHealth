@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../controllers/login_controller.dart';
 import '../models/login_request.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:petsandhealth/home_screen.dart';
 
@@ -106,6 +107,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1000),
                     child: isWeb ? _buildWebLayout() : _buildMobileLayout(),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: InkWell(
+                  onTap: () async {
+                    final Uri url = Uri.parse(
+                      'https://perfiles-one.vercel.app/',
+                    );
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Click to view Developers',
+                    style: TextStyle(
+                      color: Color(0xFF48E1C2), // Color personalizado
+                      fontSize: 20, // Tamaño más grande
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ),
