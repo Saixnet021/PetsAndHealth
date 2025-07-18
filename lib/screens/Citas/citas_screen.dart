@@ -36,9 +36,10 @@ class _CitasScreenState extends State<CitasScreen> {
             ),
           ),
           // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
+          // Removed to match background with other sections
+          // Container(
+          //   decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+          // ),
           // Main Content
           Column(
             children: [

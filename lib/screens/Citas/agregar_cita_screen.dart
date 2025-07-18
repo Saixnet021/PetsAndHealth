@@ -185,7 +185,6 @@ class _AgregarCitaScreenState extends State<AgregarCitaScreen> {
     required List<DropdownMenuItem<String>> items,
     required void Function(String?)? onChanged,
     IconData? icon,
-    bool isLoading = false,
     bool isEnabled = true,
     String? disabledHint,
   }) {

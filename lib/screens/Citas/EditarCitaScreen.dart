@@ -178,7 +178,6 @@ class _EditarCitaScreenState extends State<EditarCitaScreen> {
     required List<DropdownMenuItem<String>> items,
     required void Function(String?)? onChanged,
     IconData? icon,
-    bool isLoading = false,
     bool isEnabled = true,
     String? disabledHint,
   }) {

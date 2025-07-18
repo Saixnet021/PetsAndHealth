@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import '../Pacientes/agregar_paciente_screen.dart';
 
 class AgregarClienteScreen extends StatefulWidget {
   const AgregarClienteScreen({super.key});
@@ -84,7 +86,13 @@ class _AgregarClienteScreenState extends State<AgregarClienteScreen> {
           'direccion': _direccionController.text.trim(),
         });
 
-        Navigator.pop(context);
+        // Navigate to AgregarPacienteScreen after saving client
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AgregarPacienteScreen(),
+          ),
+        );
       } catch (e) {
         _mostrarError('Hubo un problema al agregar el cliente: $e');
       }

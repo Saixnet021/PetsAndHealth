@@ -8,6 +8,11 @@ import 'package:petsandhealth/screens/Pacientes/pacientes_screen.dart';
 import 'package:petsandhealth/profile_screen.dart';
 import 'package:petsandhealth/usuarios_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:petsandhealth/widgets/navigation/app_sidebar.dart';
+import 'package:petsandhealth/widgets/navigation/mobile_bottom_nav.dart';
+import 'package:petsandhealth/widgets/navigation/breadcrumbs.dart';
+import 'package:petsandhealth/widgets/dashboard/dashboard_widgets.dart';
+import 'package:petsandhealth/widgets/responsive/responsive_layout.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -43,194 +48,234 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isWeb = size.width > 900;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Image
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF0F2027),
-                  Color(0xFF203A43),
-                  Color(0xFF2C5364),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+      body: ResponsiveLayout(
+        mobile: _buildMobileLayout(),
+        desktop: _buildDesktopLayout(),
+      ),
+      bottomNavigationBar: MobileBottomNav(
+        currentRoute: '/home',
+        userRole: widget.role,
+        onNavigate: _handleNavigation,
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Stack(
+      children: [
+        // Background
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
-          // Dark Overlay
-          Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
-          ),
-          // Main Content
-          Column(
+        ),
+        // Content
+        SafeArea(
+          child: Column(
             children: [
-              // Custom App Bar
-              Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 24,
-                  right: 24,
-                  bottom: 24,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    // Logo Section
-                    Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.white,
-                                      Colors.teal.shade100,
-                                    ],
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.pets,
-                                  color: Colors.teal,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Text(
-                                'Pets & Health',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(0, 2),
-                                      blurRadius: 4,
-                                      color: Colors.black26,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        .animate()
-                        .fadeIn(duration: 800.ms)
-                        .slideX(begin: -0.3, end: 0),
-
-                    const Spacer(),
-
-                    // User Info
-                    GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ProfileScreen(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.account_circle,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  widget.role.toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        .animate()
-                        .fadeIn(delay: 400.ms, duration: 600.ms)
-                        .slideX(begin: 0.3, end: 0),
-
-                    const SizedBox(width: 16),
-
-                    // Logout Button
-                    Container(
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.red.withOpacity(0.3),
-                            ),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.exit_to_app,
-                              color: Colors.white,
-                            ),
-                            onPressed: () => _logout(context),
-                            tooltip: 'Cerrar Sesión',
-                          ),
-                        )
-                        .animate()
-                        .fadeIn(delay: 600.ms, duration: 600.ms)
-                        .scale(begin: const Offset(0.8, 0.8)),
-                  ],
-                ),
+              // Breadcrumbs
+              Breadcrumbs(
+                items: BreadcrumbHelper.forHome(),
+                showBackButton: false,
               ),
 
               // Dashboard Content
               Expanded(
-                child: Container(
-                  child: _isLoading
-                      ? _buildLoadingState()
-                      : _buildDashboard(isWeb),
+                child: _isLoading
+                    ? _buildLoadingState()
+                    : _buildImprovedDashboard(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Sidebar
+        AppSidebar(currentRoute: '/home', userRole: widget.role),
+
+        // Main Content
+        Expanded(
+          child: Stack(
+            children: [
+              // Background
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF0F2027),
+                      Color(0xFF203A43),
+                      Color(0xFF2C5364),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+              // Content
+              SafeArea(
+                child: Column(
+                  children: [
+                    // Header with user info
+                    _buildDesktopHeader(),
+
+                    // Breadcrumbs
+                    Breadcrumbs(
+                      items: BreadcrumbHelper.forHome(),
+                      showBackButton: false,
+                    ),
+
+                    // Dashboard Content
+                    Expanded(
+                      child: _isLoading
+                          ? _buildLoadingState()
+                          : _buildImprovedDashboard(),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          const Spacer(),
+
+          // User Info
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: Colors.white.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.account_circle,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.role.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // Logout Button
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.exit_to_app, color: Colors.white),
+              onPressed: () => _logout(context),
+              tooltip: 'Cerrar Sesión',
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _handleNavigation(String route) {
+    if (route == '/more') {
+      _showMoreOptions();
+      return;
+    }
+
+    switch (route) {
+      case '/home':
+        // Ya estamos en home
+        break;
+      case '/citas':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CitasScreen()),
+        );
+        break;
+      case '/pacientes':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PacientesScreen()),
+        );
+        break;
+      case '/doctores':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DoctoresScreen()),
+        );
+        break;
+      case '/clientes':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ClientesScreen()),
+        );
+        break;
+      case '/usuarios':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const UsuariosScreen()),
+        );
+        break;
+      case '/profile':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+        break;
+    }
+  }
+
+  void _showMoreOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MoreOptionsModal(
+        userRole: widget.role,
+        onNavigate: _handleNavigation,
       ),
     );
   }
@@ -262,6 +307,148 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildImprovedDashboard() {
+    return ResponsiveContainer(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Welcome Section
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.only(bottom: 32),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0F172A),
+                    Color(0xFF1E293B),
+                    Color(0xFF334155),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.teal.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ResponsiveText(
+                    '¡Bienvenido de vuelta!',
+                    mobileFontSize: 24,
+                    tabletFontSize: 28,
+                    desktopFontSize: 32,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ResponsiveText(
+                    'Panel de control - ${widget.role.toUpperCase()}',
+                    mobileFontSize: 14,
+                    tabletFontSize: 16,
+                    desktopFontSize: 18,
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(duration: 800.ms).slideY(begin: 0.3, end: 0),
+
+            // Statistics Grid
+            DashboardStatsGrid(userRole: widget.role),
+
+            const SizedBox(height: 32),
+
+            // Quick Actions and Recent Activity
+            ResponsiveRow(
+              children: [
+                Expanded(child: QuickActionsWidget(userRole: widget.role)),
+                if (ResponsiveBreakpoints.isDesktop(context)) ...[
+                  const SizedBox(width: 24),
+                  const Expanded(child: RecentActivityWidget()),
+                ],
+              ],
+            ),
+
+            if (!ResponsiveBreakpoints.isDesktop(context)) ...[
+              const SizedBox(height: 24),
+              const RecentActivityWidget(),
+            ],
+
+            const SizedBox(height: 32),
+
+            // Module Navigation Grid
+            _buildModuleGrid(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModuleGrid() {
+    final dashboardItems = [
+      DashboardItem(
+        icon: Icons.calendar_today,
+        title: 'Citas',
+        color: const Color(0xFF3B82F6),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CitasScreen()),
+        ),
+      ),
+      DashboardItem(
+        icon: Icons.pets,
+        title: 'Pacientes',
+        color: const Color(0xFF10B981),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PacientesScreen()),
+        ),
+      ),
+      DashboardItem(
+        icon: Icons.medical_services,
+        title: 'Doctores',
+        color: const Color(0xFF8B5CF6),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DoctoresScreen()),
+        ),
+      ),
+      DashboardItem(
+        icon: Icons.people,
+        title: 'Clientes',
+        color: const Color(0xFFF59E0B),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ClientesScreen()),
+        ),
+      ),
+      if (widget.role == 'administrador')
+        DashboardItem(
+          icon: Icons.supervised_user_circle,
+          title: 'Usuarios',
+          color: const Color(0xFFEF4444),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const UsuariosScreen()),
+          ),
+        ),
+    ];
+
+    return ResponsiveGridView(
+      children: dashboardItems
+          .map(
+            (item) => _buildDashboardTile(item, dashboardItems.indexOf(item)),
+          )
+          .toList(),
+      childAspectRatio: 1.1,
+      spacing: 20,
+      runSpacing: 20,
     );
   }
 

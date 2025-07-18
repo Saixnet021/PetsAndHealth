@@ -93,13 +93,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 top: (index * 120.0) % size.height,
                 left: (index * 180.0) % size.width,
                 child:
-                    Container(
+                    Image.asset(
+                          'assets/images/fondo-huellas.webp',
                           width: 60 + (index * 20.0),
                           height: 60 + (index * 20.0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.tealAccent.withOpacity(0.1),
-                          ),
+                          color: Colors.tealAccent.withOpacity(0.1),
+                          colorBlendMode: BlendMode.modulate,
                         )
                         .animate(onPlay: (controller) => controller.repeat())
                         .scale(

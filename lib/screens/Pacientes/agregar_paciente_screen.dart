@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:petsandhealth/screens/Pacientes/pacientes_screen.dart';
 
 class AgregarPacienteScreen extends StatefulWidget {
   const AgregarPacienteScreen({super.key});
@@ -102,7 +103,11 @@ class _AgregarPacienteScreenState extends State<AgregarPacienteScreen> {
       'fotoUrl': urlImagen ?? '',
     });
 
-    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const PacientesScreen()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   Widget _buildTextField(String label, Function(String) onChanged) {
