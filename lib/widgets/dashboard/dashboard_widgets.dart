@@ -147,7 +147,15 @@ class DashboardStatsGrid extends StatelessWidget {
             '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
         final citasHoy = data[0].docs.where((doc) {
           final citaData = doc.data() as Map<String, dynamic>;
-          return citaData['fecha'] == todayString;
+          final fechaCita = citaData['fecha']?.toString() ?? '';
+          // Comparar diferentes formatos de fecha posibles
+          return fechaCita == todayString ||
+              fechaCita ==
+                  '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}' ||
+              fechaCita.contains('${today.day}/${today.month}/${today.year}') ||
+              fechaCita.contains(
+                '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}',
+              );
         }).length;
 
         return LayoutBuilder(

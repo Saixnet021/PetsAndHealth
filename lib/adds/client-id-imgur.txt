@@ -1,2 +1,0 @@
-client-id:d379791e3e56bfd
-client secret; a18d09c2e6aa97c116a7f5ef271b93edf511d1d2
